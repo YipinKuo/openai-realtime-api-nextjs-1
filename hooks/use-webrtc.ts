@@ -11,6 +11,22 @@ export interface Tool {
   parameters?: Record<string, any>;
 }
 
+interface ConversationOption {
+  id: string;
+  Name?: string;
+  Description?: string;
+  [key: string]: any;
+}
+
+interface UseWebRTCAudioSessionParams {
+  voice: string;
+  tools?: Tool[];
+  level?: string;
+  topicName?: string;
+  conversationTopics?: string[];
+  conversationParties?: string[];
+}
+
 /**
  * The return type for the hook, matching Approach A
  * (RefObject<HTMLDivElement | null> for the audioIndicatorRef).
@@ -33,9 +49,9 @@ interface UseWebRTCAudioSessionReturn {
  * Hook to manage a real-time session with OpenAI's Realtime endpoints.
  */
 export default function useWebRTCAudioSession(
-  voice: string,
-  tools?: Tool[],
+  params: UseWebRTCAudioSessionParams,
 ): UseWebRTCAudioSessionReturn {
+  const { voice, tools, level, topicName, conversationTopics, conversationParties } = params;
   const { t, locale } = useTranslations();
   // Connection/session states
   const [status, setStatus] = useState("");
@@ -71,11 +87,126 @@ export default function useWebRTCAudioSession(
    */
   const ephemeralUserMessageIdRef = useRef<string | null>(null);
 
+  // Template definitions
+  const BEGINNER_TEMPLATE = `你是一位友善耐心的英語對話夥伴，幫助英語初學者練習與「{{topic}}」相關的英文情境對話。
+
+請遵循以下原則來引導學習者：
+
+使用簡單清楚的英文句子，避免使用難字和複雜文法
+
+保持語氣溫暖鼓勵，讓對方敢於開口
+
+當對方有錯誤時，請溫和地糾正，並提供正確說法（中英皆可）
+
+針對此主題，逐步引導收集必要資訊（例如若是訂位，就引導人數、時間、聯絡方式等）
+
+每次回應不超過2–3句，保持互動感
+
+適時給予正向回饋和鼓勵（如 "Good job!", "You're doing great!"）
+
+請以角色扮演方式開始對話，並引導對方參與，幫助他一步步建立英語口說信心。
+
+請從你的第一句話開始（不需要再說明規則）。`;
+
+  const INTERMEDIATE_TEMPLATE = `你是一位在「{{topic}}」領域工作的專業人士，正在協助一位 中級英文學習者 練習英文對話。
+
+請遵循以下原則：
+
+使用自然、地道的英文表達，適度挑戰對方的語言能力
+
+語氣專業但親切，營造真實情境
+
+適時加入一些真實世界常見狀況（如：預約衝突、額外需求、規定說明等）
+
+引導學習者使用更完整、多樣的句型與詞彙（如：請求、解釋、詢問原因等）
+
+當對方犯錯時，提供簡短明確的回饋，不中斷對話節奏
+
+可穿插一些相關問題，引導進一步交流（如：喜好、經驗、意見）
+
+請以角色扮演方式開始互動，不需列出規則。
+
+目標：幫助學習者增強溝通表達力、詞彙多樣性，以及應變能力。`;
+
+  const ADVANCED_TEMPLATE = `你是「{{topic}}」的專業人員，正在與一位 高級英文學習者 進行角色扮演對話，主題為 {{topic}}。
+
+請遵循以下原則：
+
+使用自然但具有挑戰性的英文，包括複雜句型、地道用語與專業術語
+
+設計具挑戰性的情境（如人手不足、政策限制、價格協商、突發狀況等）
+
+鼓勵對方清楚說明細節、表達偏好、做出判斷與選擇
+
+測試其問題解決能力與談判技巧（如處理衝突、詢問替代方案）
+
+語氣保持忙碌但禮貌，模擬真實高壓環境中的專業互動
+
+適時引導學習者深入了解相關資訊，如規章、流程、特色服務等
+
+請自然開始對話，不需解釋規則，並根據對方回應靈活調整難度。
+
+目標：讓學習者能在高壓或正式情境中自信流暢地溝通，提升語言與應對能力。`;
+
   /**
    * Register a function (tool) so the AI can call it.
    */
   function registerFunction(name: string, fn: Function) {
     functionRegistry.current[name] = fn;
+  }
+
+  /**
+   * Generate instruction text based on level and topic
+   */
+  function generateInstructionText(): string {
+    // Default fallback text if no level or topic provided
+    const defaultText = `你是一位友善耐心的餐廳服務員 Linda。你正在幫助一位英語初學者練習餐廳訂位對話。
+
+請遵循以下原則：
+1. 使用簡單清楚的英語，避免複雜句型
+2. 語氣友善溫暖，充滿鼓勵
+3. 當學習者犯錯時，溫和地糾正並提供正確說法
+4. 逐步引導收集訂位資訊：人數、日期時間、特殊需求、聯絡方式
+5. 每次回應不超過2-3句話
+6. 適時給予讚美和鼓勵
+
+記住：你的目標是讓學習者感到輕鬆自在，建立說英語的信心。`;
+
+    if (!level || !topicName) {
+      return defaultText;
+    }
+
+    let template: string;
+    switch (level) {
+      case 'beginner':
+        template = BEGINNER_TEMPLATE;
+        break;
+      case 'intermediate':
+        template = INTERMEDIATE_TEMPLATE;
+        break;
+      case 'advanced':
+        template = ADVANCED_TEMPLATE;
+        break;
+      default:
+        return defaultText;
+    }
+
+    // Replace {{topic}} placeholder with actual topic name
+    let instruction = template.replace(/\{\{topic\}\}/g, topicName);
+
+    // Add conversation topics context if available
+    if (conversationTopics && conversationTopics.length > 0) {
+      const topicsText = conversationTopics.join(', ');
+      instruction += `\n\n對話應該涵蓋以下主題：${topicsText}。`;
+    }
+
+    // Add conversation parties context if available
+    if (conversationParties && conversationParties.length > 0) {
+      const partiesText = conversationParties.join(', ');
+      instruction += `\n\n對話涉及以下角色：${partiesText}。請根據這些角色調整你的行為和語氣。`;
+    }
+
+    return instruction;
   }
 
   /**
@@ -98,7 +229,7 @@ export default function useWebRTCAudioSession(
     console.log("Session update sent:", sessionUpdate);
     console.log("Setting locale: " + t("language") + " : " + locale);
 
-    // Send language preference message
+    // Send language preference message with dynamic instruction text
     const languageMessage = {
       type: "conversation.item.create",
       item: {
@@ -107,17 +238,7 @@ export default function useWebRTCAudioSession(
         content: [
           {
             type: "input_text",
-            text: `你是一位友善耐心的餐廳服務員 Linda。你正在幫助一位英語初學者練習餐廳訂位對話。
-
-請遵循以下原則：
-1. 使用簡單清楚的英語，避免複雜句型
-2. 語氣友善溫暖，充滿鼓勵
-3. 當學習者犯錯時，溫和地糾正並提供正確說法
-4. 逐步引導收集訂位資訊：人數、日期時間、特殊需求、聯絡方式
-5. 每次回應不超過2-3句話
-6. 適時給予讚美和鼓勵
-
-記住：你的目標是讓學習者感到輕鬆自在，建立說英語的信心。`,
+            text: generateInstructionText(),
           },
         ],
       },
@@ -563,7 +684,8 @@ export default function useWebRTCAudioSession(
     };
     
     dataChannelRef.current.send(JSON.stringify(message));
-    dataChannelRef.current.send(JSON.stringify(response));}
+    dataChannelRef.current.send(JSON.stringify(response));
+  }
 
   // Cleanup on unmount
   useEffect(() => {
