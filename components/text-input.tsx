@@ -25,7 +25,7 @@ export function TextInput({ onSubmit, disabled = false }: TextInputProps) {
     <form onSubmit={handleSubmit} className="flex w-full gap-2">
       <Input
         type="text"
-        placeholder="Type a message..."
+        placeholder="輸入訊息..."
         value={text}
         onChange={(e) => setText(e.target.value)}
         disabled={disabled}

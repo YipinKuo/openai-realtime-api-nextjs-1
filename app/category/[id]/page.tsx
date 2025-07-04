@@ -53,11 +53,15 @@ export default async function CategoryPage({ params }: { params: { id: string } 
             href={`/topic/${topic.id}`}
             className="rounded-lg border p-4 bg-background shadow-sm flex items-start cursor-pointer hover:shadow-md transition focus:outline-none focus:ring-2 focus:ring-primary"
           >
-            <div className="flex items-center mb-1">
-              {topic.Emoji && <span className="text-2xl mr-2">{topic.Emoji}</span>}
-              <span className="text-lg font-medium">{topic.Name || topic.name}</span>
+            <div className="flex flex-col w-full">
+              <div className="flex items-center mb-1">
+                {topic.Emoji && <span className="text-2xl mr-2">{topic.Emoji}</span>}
+                <span className="text-lg font-medium">{topic.Name || topic.name}</span>
+              </div>
+              {topic.Description && (
+                <div className="text-muted-foreground mt-1">{topic.Description}</div>
+              )}
             </div>
-            {topic.Description && <div className="text-muted-foreground">{topic.Description}</div>}
           </Link>
         ))}
       </div>

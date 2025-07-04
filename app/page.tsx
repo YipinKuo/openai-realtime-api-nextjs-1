@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import ThreeDotsWave from "@/components/ui/three-dots-wave"
 
 const AVATARS = [
   {
@@ -35,7 +36,7 @@ const AvatarSelector = () => {
             key={avatar.key}
             onClick={() => handleSelect(avatar.key)}
             className="flex flex-col items-center focus:outline-none group rounded-full transition-all"
-            aria-label={`Select ${avatar.name}`}
+            aria-label={`選擇 ${avatar.name}`}
           >
             <Avatar className="w-40 h-40 md:w-56 md:h-56 shadow-lg border-4 border-white group-hover:scale-105 transition-transform">
               <AvatarImage src={avatar.src} alt={avatar.name} />
@@ -50,7 +51,7 @@ const AvatarSelector = () => {
 }
 
 const App = () => (
-  <main className="h-full flex items-center justify-center">
+  <main className="min-h-screen flex items-center justify-center">
     <AvatarSelector />
   </main>
 )

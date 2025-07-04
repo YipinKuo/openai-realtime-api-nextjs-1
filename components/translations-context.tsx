@@ -28,7 +28,7 @@ type TranslationsContextType = {
 const TranslationsContext = createContext<TranslationsContextType | null>(null)
 
 export function TranslationsProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocale] = useState('en')
+  const [locale, setLocale] = useState('zh')
 
   const t = (key: string): string => {
     const keys = key.split('.')

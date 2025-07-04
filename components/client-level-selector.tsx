@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
+import ThreeDotsWave from "@/components/ui/three-dots-wave";
 
 const LEVELS = [
   {
@@ -41,8 +42,8 @@ export function ClientLevelSelector({ topic }: ClientLevelSelectorProps) {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [selectedLevel, setSelectedLevel] = useState<string>("");
-  const [selectedConversationTopics, setSelectedConversationTopics] = useState<string[]>([]);
-  const [selectedConversationParties, setSelectedConversationParties] = useState<string[]>([]);
+  const [selectedConversationTopic, setSelectedConversationTopic] = useState<string>("");
+  const [selectedConversationParty, setSelectedConversationParty] = useState<string>("");
   const [conversationTopics, setConversationTopics] = useState<string[]>([]);
   const [conversationParties, setConversationParties] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -99,47 +100,41 @@ export function ClientLevelSelector({ topic }: ClientLevelSelectorProps) {
     setStep(2);
   };
 
-  const handleConversationTopicToggle = (topic: string) => {
-    setSelectedConversationTopics(prev => 
-      prev.includes(topic) 
-        ? prev.filter(t => t !== topic)
-        : [...prev, topic]
-    );
+  const handleConversationTopicSelect = (topic: string) => {
+    setSelectedConversationTopic(topic);
   };
 
-  const handleConversationPartyToggle = (party: string) => {
-    setSelectedConversationParties(prev => 
-      prev.includes(party) 
-        ? prev.filter(p => p !== party)
-        : [...prev, party]
-    );
+  const handleConversationPartySelect = (party: string) => {
+    setSelectedConversationParty(party);
   };
 
   const handleProceed = () => {
-    if (step === 2 && selectedConversationTopics.length > 0) {
+    if (step === 2 && selectedConversationTopic) {
       setStep(3);
-    } else if (step === 3 && selectedConversationParties.length > 0) {
+    } else if (step === 3 && selectedConversationParty) {
       // Navigate to live page with all parameters
       const params = new URLSearchParams({
         topicId: topic.id,
         level: selectedLevel,
-        conversationTopics: selectedConversationTopics.join(','),
-        conversationParties: selectedConversationParties.join(',')
+        conversationTopic: selectedConversationTopic,
+        conversationParty: selectedConversationParty
       });
       router.push(`/live?${params.toString()}`);
     }
   };
 
   const canProceed = () => {
-    if (step === 2) return selectedConversationTopics.length > 0;
-    if (step === 3) return selectedConversationParties.length > 0;
+    if (step === 2) return selectedConversationTopic !== "";
+    if (step === 3) return selectedConversationParty !== "";
     return false;
   };
 
   if (loading) {
     return (
       <main className="max-w-4xl mx-auto py-16 px-4">
-        <div className="text-center">Loading...</div>
+        <div className="flex items-center justify-center">
+          <ThreeDotsWave />
+        </div>
       </main>
     );
   }
@@ -166,9 +161,9 @@ export function ClientLevelSelector({ topic }: ClientLevelSelectorProps) {
         <div className="flex items-center space-x-4">
           <div className={`flex items-center justify-center w-8 h-8 rounded-full ${step >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>{selectedLevel ? <Check className="w-4 h-4" /> : '1'}</div>
           <div className={`w-16 h-1 ${step >= 2 ? 'bg-primary' : 'bg-muted'}`}></div>
-          <div className={`flex items-center justify-center w-8 h-8 rounded-full ${step >= 2 ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>{selectedConversationTopics.length > 0 ? <Check className="w-4 h-4" /> : '2'}</div>
+          <div className={`flex items-center justify-center w-8 h-8 rounded-full ${step >= 2 ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>{selectedConversationTopic ? <Check className="w-4 h-4" /> : '2'}</div>
           <div className={`w-16 h-1 ${step >= 3 ? 'bg-primary' : 'bg-muted'}`}></div>
-          <div className={`flex items-center justify-center w-8 h-8 rounded-full ${step >= 3 ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>{selectedConversationParties.length > 0 ? <Check className="w-4 h-4" /> : '3'}</div>
+          <div className={`flex items-center justify-center w-8 h-8 rounded-full ${step >= 3 ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>{selectedConversationParty ? <Check className="w-4 h-4" /> : '3'}</div>
         </div>
       </div>
 
@@ -192,7 +187,7 @@ export function ClientLevelSelector({ topic }: ClientLevelSelectorProps) {
         </div>
       )}
 
-      {/* Step 2: Conversation Topics Selection */}
+      {/* Step 2: Conversation Topic Selection */}
       {step === 2 && (
         <div>
           <h1 className="text-3xl font-bold mb-12 text-center">選擇對話主題</h1>
@@ -201,16 +196,16 @@ export function ClientLevelSelector({ topic }: ClientLevelSelectorProps) {
               <Card 
                 key={conversationTopic}
                 className={`cursor-pointer transition-all hover:shadow-lg ${
-                  selectedConversationTopics.includes(conversationTopic) 
+                  selectedConversationTopic === conversationTopic
                     ? 'ring-2 ring-primary bg-primary/5' 
                     : ''
                 }`}
-                onClick={() => handleConversationTopicToggle(conversationTopic)}
+                onClick={() => handleConversationTopicSelect(conversationTopic)}
               >
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     {conversationTopic}
-                    {selectedConversationTopics.includes(conversationTopic) && (
+                    {selectedConversationTopic === conversationTopic && (
                       <Check className="w-5 h-5 text-primary" />
                     )}
                   </CardTitle>
@@ -222,19 +217,19 @@ export function ClientLevelSelector({ topic }: ClientLevelSelectorProps) {
           <div className="flex justify-between mt-12">
             <Button variant="outline" onClick={() => setStep(1)}>
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
+              返回
             </Button>
             <div className="flex items-center gap-4">
-              {selectedConversationTopics.length > 0 && (
+              {selectedConversationTopic && (
                 <Badge variant="secondary">
-                  {selectedConversationTopics.length} selected
+                  {selectedConversationTopic}
                 </Badge>
               )}
               <Button 
                 onClick={handleProceed} 
                 disabled={!canProceed()}
               >
-                Next
+                下一步
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </div>
@@ -242,7 +237,7 @@ export function ClientLevelSelector({ topic }: ClientLevelSelectorProps) {
         </div>
       )}
 
-      {/* Step 3: Conversation Parties Selection */}
+      {/* Step 3: Conversation Party Selection */}
       {step === 3 && (
         <div>
           <h1 className="text-3xl font-bold mb-12 text-center">選擇對話角色</h1>
@@ -251,16 +246,16 @@ export function ClientLevelSelector({ topic }: ClientLevelSelectorProps) {
               <Card 
                 key={party}
                 className={`cursor-pointer transition-all hover:shadow-lg ${
-                  selectedConversationParties.includes(party) 
+                  selectedConversationParty === party
                     ? 'ring-2 ring-primary bg-primary/5' 
                     : ''
                 }`}
-                onClick={() => handleConversationPartyToggle(party)}
+                onClick={() => handleConversationPartySelect(party)}
               >
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     {party}
-                    {selectedConversationParties.includes(party) && (
+                    {selectedConversationParty === party && (
                       <Check className="w-5 h-5 text-primary" />
                     )}
                   </CardTitle>
@@ -272,12 +267,12 @@ export function ClientLevelSelector({ topic }: ClientLevelSelectorProps) {
           <div className="flex justify-between mt-12">
             <Button variant="outline" onClick={() => setStep(2)}>
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
+              返回
             </Button>
             <div className="flex items-center gap-4">
-              {selectedConversationParties.length > 0 && (
+              {selectedConversationParty && (
                 <Badge variant="secondary">
-                  {selectedConversationParties.length} selected
+                  {selectedConversationParty}
                 </Badge>
               )}
               <Button 
@@ -285,7 +280,7 @@ export function ClientLevelSelector({ topic }: ClientLevelSelectorProps) {
                 disabled={!canProceed()}
                 className="bg-green-600 hover:bg-green-700"
               >
-                Start Conversation
+                開始對話
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </div>

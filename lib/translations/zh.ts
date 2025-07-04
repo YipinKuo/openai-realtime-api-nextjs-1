@@ -1,115 +1,115 @@
 export const zh = {
     broadcast: {
-        end: "结束广播",
+        end: "結束廣播",
         live: "直播中",
-        start: "开始广播"
+        start: "開始對話"
     },
     header: {
-        title: "关于",
-        about: "这是一个旨在演示如何在现代 Next 15 项目中使用 OpenAI 实时 API 和 WebRTC 的项目。它已安装了 shadcn/ui 组件并实现了 WebRTC 音频会话钩子。克隆项目并定义您自己的工具。",
-        banner: "🎉 快来看看全新的 Next.js OpenAI 实时块用户界面库！",
+        title: "關於",
+        about: "這是一個旨在演示如何在現代 Next 15 項目中使用 OpenAI 實時 API 和 WebRTC 的項目。它已安裝了 shadcn/ui 組件並實現了 WebRTC 音頻會話鉤子。克隆項目並定義您自己的工具。",
+        banner: "🎉 快來看看全新的 Next.js OpenAI 實時塊用戶界面庫！",
         bannerLink: "了解更多 →",
-        beta: "测试版",
+        beta: "測試版",
         dark: "深色",
-        github: "在 GitHub 上标星",
-        language: "语言",
-        light: "浅色",
-        logo: "OpenAI 实时启动器",
-        system: "系统",
-        theme: "切换主题",
-        twitter: "在推特上关注"
+        github: "在 GitHub 上標星",
+        language: "語言",
+        light: "淺色",
+        logo: "TALK",
+        system: "系統",
+        theme: "切換主題",
+        twitter: "在推特上關注"
     },
     hero: {
         badge: "Next.js + shadcn/ui",
-        subtitle: "点击下方按钮进行演示并尝试可用工具",
-        title: "OpenAI 实时 API (WebRTC)"
+        subtitle: "點擊下方按鈕進行演示並嘗試可用工具",
+        title: "OpenAI 實時 API (WebRTC)"
     },
     messageControls: {
-        content: "内容",
-        filter: "按类型筛选",
-        log: "控制台日志",
-        logs: "对话记录",
+        content: "內容",
+        filter: "按類型篩選",
+        log: "控制台日誌",
+        logs: "對話記錄",
         search: "搜索消息...",
-        type: "类型",
-        view: "查看日志"
+        type: "類型",
+        view: "查看日誌"
     },
     status: {
         error: "哎呀！",
-        info: "正在切换语音助手...",
-        language: "语言已从以下更改",
-        session: "会话已建立",
-        success: "我们已经开始直播了！",
-        toggle: "正在切换语音助手..."
+        info: "正在切換語音助手...",
+        language: "語言已從以下更改",
+        session: "會話已建立",
+        success: "我們已經開始直播了！",
+        toggle: "正在切換語音助手..."
     },
     tokenUsage: {
-        input: "输入令牌",
-        output: "输出令牌",
-        total: "总令牌数",
+        input: "輸入令牌",
+        output: "輸出令牌",
+        total: "總令牌數",
         usage: "令牌使用量"
     },
     tools: {
         availableTools: {
             title: "可用工具",
             copyFn: {
-                description: '说"复制到剪贴板"以将其粘贴到某处。',
-                name: "复制功能"
+                description: '說"複製到剪貼板"以將其粘貼到某處。',
+                name: "複製功能"
             },
             getTime: {
-                description: '问"现在几点了？"以获取当前时间。',
-                name: "获取时间"
+                description: '問"現在幾點了？"以獲取當前時間。',
+                name: "獲取時間"
             },
             launchWebsite: {
-                description: '说"带我去[网站]"以在新标签页中打开网站。',
-                name: "启动网站"
+                description: '說"帶我去[網站]"以在新標籤頁中打開網站。',
+                name: "啟動網站"
             },
             partyMode: {
-                description: '说"开启派对模式"以启动动态彩带动画！',
-                name: "派对模式"
+                description: '說"開啟派對模式"以啟動動態彩帶動畫！',
+                name: "派對模式"
             },
             themeSwitcher: {
-                description: '说"更换背景"或"切换到深色模式"或"切换到浅色模式"。',
-                name: "主题切换器"
+                description: '說"更換背景"或"切換到深色模式"或"切換到淺色模式"。',
+                name: "主題切換器"
             },
             scrapeWebsite: {
-                name: "网页内容提取器",
-                description: '说"提取[网站URL]的内容"来获取网页内容。'
+                name: "網頁內容提取器",
+                description: '說"提取[網站URL]的內容"來獲取網頁內容。'
             }
         },
         clipboard: {
-            description: "您现在可以将其粘贴到某处。",
-            success: "文本已复制到剪贴板。请让用户将其粘贴到某处。",
-            toast: "文本已复制到剪贴板！"
+            description: "您現在可以將其粘貼到某處。",
+            success: "文本已複製到剪貼板。請讓用戶將其粘貼到某處。",
+            toast: "文本已複製到剪貼板！"
         },
         launchWebsite: {
-            description: "启动网站失败",
-            success: "网站已启动！告诉用户网站已经打开。",
-            toast: "正在启动网站 "
+            description: "啟動網站失敗",
+            success: "網站已啟動！告訴用戶網站已經打開。",
+            toast: "正在啟動網站 "
         },
         partyMode: {
-            description: "无法激活派对模式",
-            success: "派对模式已激活",
-            toast: "派对模式！"
+            description: "無法激活派對模式",
+            success: "派對模式已激活",
+            toast: "派對模式！"
         },
-        switchTheme: "主题已切换至 ",
-        themeFailed: "主题切换失败",
-        time: "向用户播报：当前时间是 ",
+        switchTheme: "主題已切換至 ",
+        themeFailed: "主題切換失敗",
+        time: "向用戶播報：當前時間是 ",
         scrapeWebsite: {
-            success: "网页内容提取成功",
-            description: "网页内容提取失败",
-            toast: "正在提取网页内容..."
+            success: "網頁內容提取成功",
+            description: "網頁內容提取失敗",
+            toast: "正在提取網頁內容..."
         }
     },
     transcriber: {
-        title: "实时转录"
+        title: "實時轉錄"
     },
     voice: {
-        select: "选择语音",
-        ash: "Ash - 温和专业",
-        ballad: "Ballad - 温暖动人",
+        select: "選擇語音",
+        ash: "Ash - 溫和專業",
+        ballad: "Ballad - 溫暖動人",
         coral: "Coral - 清晰友好",
-        sage: "Sage - 权威平静",
-        verse: "Verse - 富有表现力"
+        sage: "Sage - 權威平靜",
+        verse: "Verse - 富有表現力"
     },
     language: "Chinese",
-    languagePrompt: "只用中文说话和回答。你一定要保持你的回答是中文的。如果用户说其他语言，你应该用中文回答。（Speak Chinese only）"
+    languagePrompt: "只用中文說話和回答。你一定要保持你的回答是中文的。如果用戶說其他語言，你應該用中文回答。（Speak Chinese only）"
 }

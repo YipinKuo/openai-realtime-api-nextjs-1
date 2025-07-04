@@ -53,7 +53,7 @@ export function Header() {
           className="flex gap-3 items-center justify-end ml-auto"
         >
           <LanguageSwitcher />
-          <Link
+          {/* <Link
             href={siteConfig.links.github}
             target="_blank"
             rel="noreferrer noopener"
@@ -88,7 +88,7 @@ export function Header() {
                 <TwitterIcon />
               </Button>
             </motion.div>
-          </Link>
+          </Link> */}
           <ThemeSwitcher />
         </motion.div>
       </div>

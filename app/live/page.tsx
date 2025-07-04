@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation"
 import useWebRTCAudioSession from "@/hooks/use-webrtc"
 import { tools } from "@/lib/tools"
 import { Welcome } from "@/components/welcome"
-import { VoiceSelector } from "@/components/voice-select"
 import { BroadcastButton } from "@/components/broadcast-button"
 import { StatusDisplay } from "@/components/status"
 import { TokenUsageDisplay } from "@/components/token-usage"
@@ -24,26 +23,46 @@ interface Topic {
   Emoji?: string;
 }
 
-// Conversation topics and parties are now just string arrays
+// Function to map English level names to Chinese
+const getLevelInChinese = (level: string): string => {
+  const levelMap: Record<string, string> = {
+    'beginner': '初級',
+    'intermediate': '中級',
+    'advanced': '高級'
+  };
+  return levelMap[level.toLowerCase()] || level;
+};
 
 const LiveAppContent: React.FC = () => {
-  // State for voice selection
-  const [voice, setVoice] = useState("ash")
+  // Get selected avatar and determine voice
+  const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null)
+  const [voice, setVoice] = useState("alloy") // default fallback
   
   // Get URL search parameters
   const searchParams = useSearchParams()
   const topicId = searchParams.get('topicId')
   const level = searchParams.get('level')
-  const conversationTopicsParam = searchParams.get('conversationTopics')
-  const conversationPartiesParam = searchParams.get('conversationParties')
+  const conversationTopic = searchParams.get('conversationTopic')
+  const conversationParty = searchParams.get('conversationParty')
   
   // State for topic data
   const [topic, setTopic] = useState<Topic | null>(null)
   const [isLoadingTopic, setIsLoadingTopic] = useState(false)
-  const [selectedConversationTopics, setSelectedConversationTopics] = useState<string[]>([])
-  const [selectedConversationParties, setSelectedConversationParties] = useState<string[]>([])
 
-  // Fetch topic data and parse params as string arrays
+  // Get avatar from localStorage and set voice
+  useEffect(() => {
+    const avatar = localStorage.getItem('selectedAvatar')
+    setSelectedAvatar(avatar)
+    
+    // Map avatar to voice
+    if (avatar === "jin") {
+      setVoice("coral")
+    } else if (avatar === "zhan") {
+      setVoice("ash")
+    }
+  }, [])
+
+  // Fetch topic data
   useEffect(() => {
     if (topicId) {
       setIsLoadingTopic(true)
@@ -64,14 +83,7 @@ const LiveAppContent: React.FC = () => {
           setIsLoadingTopic(false)
         })
     }
-    // Parse conversation topics and parties as string arrays
-    if (conversationTopicsParam) {
-      setSelectedConversationTopics(conversationTopicsParam.split(',').map(s => s.trim()).filter(Boolean))
-    }
-    if (conversationPartiesParam) {
-      setSelectedConversationParties(conversationPartiesParam.split(',').map(s => s.trim()).filter(Boolean))
-    }
-  }, [topicId, conversationTopicsParam, conversationPartiesParam])
+  }, [topicId])
 
   // Get topic name for display and instruction generation
   const topicName = topic?.Name || topic?.name || null
@@ -90,8 +102,8 @@ const LiveAppContent: React.FC = () => {
     tools,
     level: level || undefined,
     topicName: topicName || undefined,
-    conversationTopics: selectedConversationTopics,
-    conversationParties: selectedConversationParties
+    conversationTopics: conversationTopic ? [conversationTopic] : [],
+    conversationParties: conversationParty ? [conversationParty] : []
   })
 
   // Get all tools functions
@@ -124,7 +136,7 @@ const LiveAppContent: React.FC = () => {
         {/* <Welcome /> */}
         
         {/* Display topic and level info if available */}
-        {(topic || level || selectedConversationTopics.length > 0 || selectedConversationParties.length > 0) && (
+        {(topic || level || conversationTopic || conversationParty) && (
           <motion.div 
             className="mb-6 text-center"
             initial={{ opacity: 0, y: -10 }}
@@ -140,7 +152,7 @@ const LiveAppContent: React.FC = () => {
             
             {level && (
               <div className="text-sm text-muted-foreground mb-2">
-                Level: {level.charAt(0).toUpperCase() + level.slice(1)}
+                等級: {getLevelInChinese(level)}
               </div>
             )}
             
@@ -150,30 +162,26 @@ const LiveAppContent: React.FC = () => {
               </div>
             )}
             
-            {/* Display selected conversation topics */}
-            {selectedConversationTopics.length > 0 && (
+            {/* Display selected conversation topic */}
+            {conversationTopic && (
               <div className="mb-3">
-                <div className="text-sm font-medium text-muted-foreground mb-1">Conversation Topics:</div>
-                <div className="flex flex-wrap justify-center gap-1">
-                  {selectedConversationTopics.map((topic) => (
-                    <Badge key={topic} variant="secondary" className="text-xs">
-                      {topic}
-                    </Badge>
-                  ))}
+                <div className="text-sm font-medium text-muted-foreground mb-1">對話主題:</div>
+                <div className="flex justify-center">
+                  <Badge variant="secondary" className="text-xs">
+                    {conversationTopic}
+                  </Badge>
                 </div>
               </div>
             )}
             
-            {/* Display selected conversation parties */}
-            {selectedConversationParties.length > 0 && (
+            {/* Display selected conversation party */}
+            {conversationParty && (
               <div className="mb-3">
-                <div className="text-sm font-medium text-muted-foreground mb-1">Conversation Parties:</div>
-                <div className="flex flex-wrap justify-center gap-1">
-                  {selectedConversationParties.map((party) => (
-                    <Badge key={party} variant="outline" className="text-xs">
-                      {party}
-                    </Badge>
-                  ))}
+                <div className="text-sm font-medium text-muted-foreground mb-1">對話角色:</div>
+                <div className="flex justify-center">
+                  <Badge variant="outline" className="text-xs">
+                    {conversationParty}
+                  </Badge>
                 </div>
               </div>
             )}
@@ -186,7 +194,20 @@ const LiveAppContent: React.FC = () => {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2, duration: 0.4 }}
         >
-          <VoiceSelector value={voice} onValueChange={setVoice} />
+          {/* Display selected avatar and voice */}
+          {selectedAvatar && (
+            <div className="text-center mb-4">
+              <div className="text-sm text-muted-foreground mb-1">選擇的老師:</div>
+              <div className="flex items-center justify-center gap-2">
+                <span className="text-lg font-medium">
+                  {selectedAvatar === "jin" ? "金莉莉" : "金戰"}
+                </span>
+                {/* <span className="text-xs text-muted-foreground">
+                  ({voice} voice)
+                </span> */}
+              </div>
+            </div>
+          )}
           
           <div className="flex flex-col items-center gap-4">
             <BroadcastButton 
@@ -207,14 +228,14 @@ const LiveAppContent: React.FC = () => {
           )}
           
           <MessageControls 
-            isSessionActive={isSessionActive}
-            onSendTextMessage={sendTextMessage}
+            conversation={conversation}
+            msgs={msgs}
           />
           
-          <ToolsEducation />
+          {/* <ToolsEducation /> */}
           
           <TextInput 
-            onSendMessage={sendTextMessage}
+            onSubmit={sendTextMessage}
             disabled={!isSessionActive}
           />
         </motion.div>
@@ -239,7 +260,7 @@ const LiveAppContent: React.FC = () => {
                       <div className="text-sm font-medium mb-1">
                         {msg.role === 'user' ? 'You' : 'Assistant'}
                       </div>
-                      <div className="text-sm">{msg.content}</div>
+                      <div className="text-sm">{msg.text}</div>
                     </div>
                   </div>
                 ))}

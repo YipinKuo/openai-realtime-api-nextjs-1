@@ -90,6 +90,8 @@ export default function useWebRTCAudioSession(
   // Template definitions
   const BEGINNER_TEMPLATE = `你是一位友善耐心的英語對話夥伴，幫助英語初學者練習與「{{topic}}」相關的英文情境對話。
 
+{{roleplay_context}}
+
 請遵循以下原則來引導學習者：
 
 使用簡單清楚的英文句子，避免使用難字和複雜文法
@@ -110,6 +112,8 @@ export default function useWebRTCAudioSession(
 
   const INTERMEDIATE_TEMPLATE = `你是一位在「{{topic}}」領域工作的專業人士，正在協助一位 中級英文學習者 練習英文對話。
 
+{{roleplay_context}}
+
 請遵循以下原則：
 
 使用自然、地道的英文表達，適度挑戰對方的語言能力
@@ -129,6 +133,8 @@ export default function useWebRTCAudioSession(
 目標：幫助學習者增強溝通表達力、詞彙多樣性，以及應變能力。`;
 
   const ADVANCED_TEMPLATE = `你是「{{topic}}」的專業人員，正在與一位 高級英文學習者 進行角色扮演對話，主題為 {{topic}}。
+
+{{roleplay_context}}
 
 請遵循以下原則：
 
@@ -194,17 +200,22 @@ export default function useWebRTCAudioSession(
     // Replace {{topic}} placeholder with actual topic name
     let instruction = template.replace(/\{\{topic\}\}/g, topicName);
 
-    // Add conversation topics context if available
-    if (conversationTopics && conversationTopics.length > 0) {
-      const topicsText = conversationTopics.join(', ');
-      instruction += `\n\n對話應該涵蓋以下主題：${topicsText}。`;
+    // Generate roleplay context based on conversation topic and party
+    let roleplayContext = "";
+    if (conversationTopics && conversationTopics.length > 0 && conversationParties && conversationParties.length > 0) {
+      const topic = conversationTopics[0]; // Single topic
+      const party = conversationParties[0]; // Single party
+      roleplayContext = `角色扮演設定：學習者扮演「${party}」的角色，你將與他討論「${topic}」相關的內容。請根據這個角色設定來調整你的回應和語氣。`;
+    } else if (conversationTopics && conversationTopics.length > 0) {
+      const topic = conversationTopics[0];
+      roleplayContext = `對話重點：請專注於「${topic}」相關的內容進行討論。`;
+    } else if (conversationParties && conversationParties.length > 0) {
+      const party = conversationParties[0];
+      roleplayContext = `角色扮演設定：學習者扮演「${party}」的角色，請根據這個角色來調整你的回應。`;
     }
 
-    // Add conversation parties context if available
-    if (conversationParties && conversationParties.length > 0) {
-      const partiesText = conversationParties.join(', ');
-      instruction += `\n\n對話涉及以下角色：${partiesText}。請根據這些角色調整你的行為和語氣。`;
-    }
+    // Replace {{roleplay_context}} placeholder
+    instruction = instruction.replace(/\{\{roleplay_context\}\}/g, roleplayContext);
 
     return instruction;
   }
@@ -451,9 +462,13 @@ export default function useWebRTCAudioSession(
    */
   async function getEphemeralToken() {
     try {
+      // Get selected avatar from localStorage
+      const selectedAvatar = typeof window !== 'undefined' ? localStorage.getItem('selectedAvatar') : null;
+      
       const response = await fetch("/api/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ selectedAvatar }),
       });
       if (!response.ok) {
         throw new Error(`Failed to get ephemeral token: ${response.status}`);
