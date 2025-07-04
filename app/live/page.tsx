@@ -215,7 +215,7 @@ const LiveAppContent: React.FC = () => {
               onClick={handleStartStopClick}
             />
           </div>
-          {msgs.length > 4 && <TokenUsageDisplay messages={msgs} />}
+          {/* {msgs.length > 4 && <TokenUsageDisplay messages={msgs} />} */}
           {status && (
             <motion.div 
               className="w-full flex flex-col gap-2"

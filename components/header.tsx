@@ -52,7 +52,7 @@ export function Header() {
           transition={{ delay: 0.1 }}
           className="flex gap-3 items-center justify-end ml-auto"
         >
-          <LanguageSwitcher />
+          {/* <LanguageSwitcher /> */}
           {/* <Link
             href={siteConfig.links.github}
             target="_blank"
@@ -89,7 +89,7 @@ export function Header() {
               </Button>
             </motion.div>
           </Link> */}
-          <ThemeSwitcher />
+          {/* <ThemeSwitcher /> */}
         </motion.div>
       </div>
     </motion.header>

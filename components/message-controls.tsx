@@ -90,13 +90,14 @@ export function MessageControls({ conversation, msgs }: { conversation: Conversa
   return (
     <div className="space-y-2">
       <div className="flex justify-between items-center">
-        <h3 className="text-sm font-medium">{t('messageControls.logs')}</h3>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm">
-              {t('messageControls.view')}
-            </Button>
-          </DialogTrigger>
+        {/* <h3 className="text-sm font-medium">{t('messageControls.logs')}</h3> */}
+        {process.env.NODE_ENV === 'development' && (
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm">
+                {t('messageControls.view')}
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-full p-4 mx-auto overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{t('messageControls.logs')}</DialogTitle>
@@ -133,6 +134,7 @@ export function MessageControls({ conversation, msgs }: { conversation: Conversa
             </div>
           </DialogContent>
         </Dialog>
+        )}
       </div>
 
       <Transcriber conversation={conversation} />

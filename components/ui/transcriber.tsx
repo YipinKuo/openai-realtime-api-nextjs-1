@@ -161,11 +161,11 @@ export default function Transcriber({ conversation }: TranscriberProps) {
  return (
    <div className="flex flex-col w-full h-full mx-auto bg-background rounded-lg shadow-lg overflow-hidden dark:bg-background">
      {/* Header */}
-     <div className="bg-secondary px-4 py-3 flex items-center justify-between dark:bg-secondary">
+     {/* <div className="bg-secondary px-4 py-3 flex items-center justify-between dark:bg-secondary">
        <div className="font-medium text-foreground dark:text-foreground">
         {t('transcriber.title')}
        </div>
-     </div>
+     </div> */}
 
      {/* Body */}
      <div

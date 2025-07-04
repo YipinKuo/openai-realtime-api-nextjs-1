@@ -30,6 +30,7 @@ const AvatarSelector = () => {
 
   return (
     <div className="flex flex-col items-center justify-center h-full w-full">
+      <h1 className="text-4xl font-bold text-center mb-8">選擇你的英語老師</h1>
       <div className="flex gap-12 mb-6">
         {AVATARS.map((avatar) => (
           <button
