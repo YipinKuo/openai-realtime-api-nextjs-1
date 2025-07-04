@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import useWebRTCAudioSession from "@/hooks/use-webrtc"
 import { tools } from "@/lib/tools"
@@ -26,7 +26,7 @@ interface Topic {
 
 // Conversation topics and parties are now just string arrays
 
-const App: React.FC = () => {
+const LiveAppContent: React.FC = () => {
   // State for voice selection
   const [voice, setVoice] = useState("ash")
   
@@ -200,25 +200,64 @@ const App: React.FC = () => {
               className="w-full flex flex-col gap-2"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
+              transition={{ delay: 0.3, duration: 0.4 }}
             >
-              <MessageControls conversation={conversation} msgs={msgs} />
-              <TextInput 
-                onSubmit={sendTextMessage}
-                disabled={!isSessionActive}
-              />
+              <StatusDisplay status={status} />
             </motion.div>
           )}
+          
+          <MessageControls 
+            isSessionActive={isSessionActive}
+            onSendTextMessage={sendTextMessage}
+          />
+          
+          <ToolsEducation />
+          
+          <TextInput 
+            onSendMessage={sendTextMessage}
+            disabled={!isSessionActive}
+          />
         </motion.div>
         
-        {status && <StatusDisplay status={status} />}
-        <div className="w-full flex flex-col items-center gap-4">
-          <ToolsEducation />
-        </div>
+        {conversation.length > 0 && (
+          <motion.div 
+            className="w-full max-w-2xl mt-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.4 }}
+          >
+            <div className="bg-card text-card-foreground rounded-xl border shadow-sm p-6">
+              <h3 className="text-lg font-semibold mb-4">Conversation History</h3>
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {conversation.map((msg, index) => (
+                  <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-xs lg:max-w-md px-3 py-2 rounded-lg ${
+                      msg.role === 'user' 
+                        ? 'bg-primary text-primary-foreground' 
+                        : 'bg-muted'
+                    }`}>
+                      <div className="text-sm font-medium mb-1">
+                        {msg.role === 'user' ? 'You' : 'Assistant'}
+                      </div>
+                      <div className="text-sm">{msg.content}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
       </motion.div>
     </main>
-  )
-}
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LiveAppContent />
+    </Suspense>
+  );
+};
 
 export default App; 
