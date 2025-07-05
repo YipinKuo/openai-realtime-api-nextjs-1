@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { useRouter } from "next/navigation";
 import { Conversation } from "@/lib/conversations";
 import { useTranslations } from "@/components/translations-context";
 
@@ -53,6 +54,7 @@ export default function useWebRTCAudioSession(
 ): UseWebRTCAudioSessionReturn {
   const { voice, tools, level, topicName, conversationTopics, conversationParties } = params;
   const { t, locale } = useTranslations();
+  const router = useRouter();
   // Connection/session states
   const [status, setStatus] = useState("");
   const [isSessionActive, setIsSessionActive] = useState(false);
@@ -108,6 +110,8 @@ export default function useWebRTCAudioSession(
 
 請以角色扮演方式開始對話，並引導對方參與，幫助他一步步建立英語口說信心。
 
+在每一輪對話中，請主動教學習者一個有用的英文句子（可以是回應或提問），並請學習者跟著你大聲重複這句話。這有助於加強口說練習與實際應用能力。
+
 請從你的第一句話開始（不需要再說明規則）。`;
 
   const INTERMEDIATE_TEMPLATE = `你是一位在「{{topic}}」領域工作的專業人士，正在協助一位 中級英文學習者 練習英文對話。
@@ -129,6 +133,8 @@ export default function useWebRTCAudioSession(
 每次回應只問一個問題，等待學習者回答後再繼續
 
 可穿插一些相關問題，引導進一步交流（如：喜好、經驗、意見）
+
+在每一輪對話中，請主動教學習者一個有用的英文句子（可以是回應或提問），並請學習者跟著你大聲重複這句話。這有助於加強口說練習與實際應用能力。
 
 請以角色扮演方式開始互動，不需列出規則。
 
@@ -153,6 +159,8 @@ export default function useWebRTCAudioSession(
 適時引導學習者深入了解相關資訊，如規章、流程、特色服務等
 
 每次回應只問一個問題，等待學習者回答後再繼續
+
+在每一輪對話中，請主動教學習者一個有用的英文句子（可以是回應或提問），並請學習者跟著你大聲重複這句話。這有助於加強口說練習與實際應用能力。
 
 請自然開始對話，不需解釋規則，並根據對方回應靈活調整難度。
 
@@ -181,6 +189,8 @@ export default function useWebRTCAudioSession(
 6. 適時給予讚美和鼓勵
 
 記住：你的目標是讓學習者感到輕鬆自在，建立說英語的信心。
+
+在每一輪對話中，請主動教學習者一個有用的英文句子（可以是回應或提問），並請學習者跟著你大聲重複這句話。這有助於加強口說練習與實際應用能力。
 
 IMPORTANT: After each of your responses, provide helpful conversation hints to guide the user. Use the showHints tool to display 3-4 relevant quick reply options that would naturally continue the conversation. These hints should be:
 - Contextually relevant to what you just discussed
@@ -724,6 +734,17 @@ For example, after discussing food preferences, you might show hints like: "What
     dataChannelRef.current.send(JSON.stringify(message));
     dataChannelRef.current.send(JSON.stringify(response));
   }
+
+  // Navigate to completed page when session becomes inactive
+  const wasSessionActiveRef = useRef(false);
+  
+  useEffect(() => {
+    console.log("isSessionActive", isSessionActive);
+    if (wasSessionActiveRef.current && !isSessionActive) {
+      // router.push("/completed");
+    }
+    wasSessionActiveRef.current = isSessionActive;
+  }, [isSessionActive, router]);
 
   // Cleanup on unmount
   useEffect(() => {

@@ -129,7 +129,7 @@ const LiveAppContent: React.FC = () => {
   return (
     <main className="h-full">
       <motion.div 
-        className="container flex flex-col items-center justify-center mx-auto max-w-3xl my-20 p-12 border rounded-lg shadow-xl"
+        className="flex flex-col items-center justify-center w-[90vw] mx-auto my-20 p-12 border rounded-lg shadow-xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -190,7 +190,7 @@ const LiveAppContent: React.FC = () => {
         )}
         
         <motion.div 
-          className="w-full max-w-md bg-card text-card-foreground rounded-xl border shadow-sm p-6 space-y-4"
+          className="w-full bg-card text-card-foreground rounded-xl border shadow-sm p-6 space-y-4"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2, duration: 0.4 }}
