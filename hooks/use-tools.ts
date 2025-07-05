@@ -190,12 +190,41 @@ export const useToolsFunctions = () => {
     }
   }
 
+  const hintsFunction = ({ hints }: { hints: string }) => {
+    try {
+      // Split comma-separated hints into array
+      const hintsArray = hints.split(',').map(hint => hint.trim()).filter(hint => hint.length > 0);
+      
+      // Dispatch custom event to show hints
+      const event = new CustomEvent('showHints', { 
+        detail: { hints: hintsArray } 
+      });
+      window.dispatchEvent(event);
+      
+      toast.success("💡 顯示快速回覆提示", {
+        description: `已顯示 ${hintsArray.length} 個快速回覆選項`,
+      })
+      
+      return {
+        success: true,
+        hints: hintsArray,
+        message: `顯示了 ${hintsArray.length} 個快速回覆提示按鈕`
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `顯示提示失敗: ${error}`
+      };
+    }
+  }
+
   return {
     timeFunction,
     backgroundFunction,
     partyFunction,
     launchWebsite,
     copyToClipboard,
-    scrapeWebsite
+    scrapeWebsite,
+    hintsFunction
   }
 }

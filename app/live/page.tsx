@@ -118,7 +118,8 @@ const LiveAppContent: React.FC = () => {
         partyFunction: 'partyMode',
         launchWebsite: 'launchWebsite', 
         copyToClipboard: 'copyToClipboard',
-        scrapeWebsite: 'scrapeWebsite'
+        scrapeWebsite: 'scrapeWebsite',
+        hintsFunction: 'showHints'
       };
       
       registerFunction(functionNames[name], func);
@@ -240,7 +241,7 @@ const LiveAppContent: React.FC = () => {
           />
         </motion.div>
         
-        {conversation.length > 0 && (
+        {/* {conversation.length > 0 && (
           <motion.div 
             className="w-full max-w-2xl mt-8"
             initial={{ opacity: 0, y: 20 }}
@@ -267,7 +268,7 @@ const LiveAppContent: React.FC = () => {
               </div>
             </div>
           </motion.div>
-        )}
+        )} */}
       </motion.div>
     </main>
   );

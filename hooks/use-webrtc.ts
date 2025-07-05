@@ -102,7 +102,7 @@ export default function useWebRTCAudioSession(
 
 針對此主題，逐步引導收集必要資訊（例如若是訂位，就引導人數、時間、聯絡方式等）
 
-每次回應不超過2–3句，保持互動感
+每次回應只問一個問題，等待學習者回答後再繼續
 
 適時給予正向回饋和鼓勵（如 "Good job!", "You're doing great!"）
 
@@ -125,6 +125,8 @@ export default function useWebRTCAudioSession(
 引導學習者使用更完整、多樣的句型與詞彙（如：請求、解釋、詢問原因等）
 
 當對方犯錯時，提供簡短明確的回饋，不中斷對話節奏
+
+每次回應只問一個問題，等待學習者回答後再繼續
 
 可穿插一些相關問題，引導進一步交流（如：喜好、經驗、意見）
 
@@ -150,6 +152,8 @@ export default function useWebRTCAudioSession(
 
 適時引導學習者深入了解相關資訊，如規章、流程、特色服務等
 
+每次回應只問一個問題，等待學習者回答後再繼續
+
 請自然開始對話，不需解釋規則，並根據對方回應靈活調整難度。
 
 目標：讓學習者能在高壓或正式情境中自信流暢地溝通，提升語言與應對能力。`;
@@ -173,10 +177,18 @@ export default function useWebRTCAudioSession(
 2. 語氣友善溫暖，充滿鼓勵
 3. 當學習者犯錯時，溫和地糾正並提供正確說法
 4. 逐步引導收集訂位資訊：人數、日期時間、特殊需求、聯絡方式
-5. 每次回應不超過2-3句話
+5. 每次回應只問一個問題，等待學習者回答後再繼續
 6. 適時給予讚美和鼓勵
 
-記住：你的目標是讓學習者感到輕鬆自在，建立說英語的信心。`;
+記住：你的目標是讓學習者感到輕鬆自在，建立說英語的信心。
+
+IMPORTANT: After each of your responses, provide helpful conversation hints to guide the user. Use the showHints tool to display 3-4 relevant quick reply options that would naturally continue the conversation. These hints should be:
+- Contextually relevant to what you just discussed
+- Helpful for language learning (questions, follow-ups, or practice opportunities)
+- Short and clear (1-3 words each)
+- In the same language as your conversation
+
+For example, after discussing food preferences, you might show hints like: "What's your favorite?, Tell me more, Ask about prices, Practice ordering". This helps users continue the conversation naturally and practice their language skills.`;
 
     if (!level || !topicName) {
       return defaultText;
@@ -216,6 +228,17 @@ export default function useWebRTCAudioSession(
 
     // Replace {{roleplay_context}} placeholder
     instruction = instruction.replace(/\{\{roleplay_context\}\}/g, roleplayContext);
+
+    // Add hint functionality instructions to all templates
+    instruction += `
+
+IMPORTANT: After each of your responses, provide helpful conversation hints to guide the user. Use the showHints tool to display 3-4 relevant quick reply options that would naturally continue the conversation. These hints should be:
+- Contextually relevant to what you just discussed
+- Helpful for language learning (questions, follow-ups, or practice opportunities)
+- Short and clear (1-3 words each)
+- In the same language as your conversation
+
+For example, after discussing food preferences, you might show hints like: "What's your favorite?, Tell me more, Ask about prices, Practice ordering". This helps users continue the conversation naturally and practice their language skills.`;
 
     return instruction;
   }

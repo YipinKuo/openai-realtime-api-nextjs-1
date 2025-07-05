@@ -60,6 +60,15 @@ const toolDefinitions = {
                 description: 'The URL to scrape'
             }
         }
+    },
+    showHints: {
+        description: 'Shows quick reply hint buttons to help the user with conversation',
+        parameters: {
+            hints: {
+                type: 'string',
+                description: 'Comma-separated list of hint strings to display as quick reply buttons'
+            }
+        }
     }
 } as const;
 
