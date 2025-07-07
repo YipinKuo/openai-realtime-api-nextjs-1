@@ -263,21 +263,17 @@ For example, after discussing food preferences, you might show hints like: "What
    * Configure the data channel on open, sending a session update to the server.
    */
   function configureDataChannel(dataChannel: RTCDataChannel) {
+    console.log("configureDataChannel");
     // Send session update
     const sessionUpdate = {
       type: "session.update",
       session: {
         modalities: ["text", "audio"],
         tools: tools || [],
-        input_audio_transcription: {
-          language: "en",
-          model: "gpt-4o-transcribe",
-          prompt: `Only transcribe spoken words; exclude all non-verbal and background noises. Do NOT omit, summarize, or “clean up” anything related to spoken words. Output every word as spoken. Do NOT truncate or leave out anything in the transcript, that is spoken`
-        },
-        turn_detection: {
-          type: "semantic_vad",
-          eagerness: "low",
-        }
+        // turn_detection: {
+        //   type: "semantic_vad",
+        //   eagerness: "low",
+        // }
       },
     };
     dataChannel.send(JSON.stringify(sessionUpdate));
@@ -301,24 +297,26 @@ For example, after discussing food preferences, you might show hints like: "What
     };
     dataChannel.send(JSON.stringify(languageMessage));
 
-    // Send language preference message with dynamic instruction text
-    const languageMessage2 = {
-      "type": "response.create",
-      "response": {
-        input: [{
-          type: "message",
-          role: "user",
-          content: [
-            {
-              type: "input_text",
-              text: "Hello!",
-            },
-          ],
-        }],
-      }
-    };
+    // setTimeout(() => {
+    //   // Send language preference message with dynamic instruction text
+    //   const languageMessage2 = {
+    //     "type": "response.create",
+    //     "response": {
+    //       input: [{
+    //         type: "message",
+    //         role: "user",
+    //         content: [
+    //           {
+    //             type: "input_text",
+    //             text: "Hello!",
+    //           },
+    //         ],
+    //       }],
+    //     }
+    //   };
 
-    dataChannel.send(JSON.stringify(languageMessage2));
+    //   dataChannel.send(JSON.stringify(languageMessage2));
+    // }, 1000);
   }
 
   /**
@@ -595,15 +593,15 @@ For example, after discussing food preferences, you might show hints like: "What
    */
   async function startSession() {
     try {
-      setStatus("Requesting microphone access...");
+      // setStatus("Requesting microphone access...");
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       audioStreamRef.current = stream;
       setupAudioVisualization(stream);
 
-      setStatus("Fetching ephemeral token...");
+      // setStatus("Fetching ephemeral token...");
       const ephemeralToken = await getEphemeralToken();
 
-      setStatus("Establishing connection...");
+      // setStatus("Establishing connection...");
       const pc = new RTCPeerConnection();
       peerConnectionRef.current = pc;
 
@@ -648,7 +646,7 @@ For example, after discussing food preferences, you might show hints like: "What
 
       // Send SDP offer to OpenAI Realtime
       const baseUrl = "https://api.openai.com/v1/realtime";
-      const model = "gpt-4o-realtime-preview-2024-12-17";
+      const model = "gpt-4o-realtime-preview";
       const response = await fetch(`${baseUrl}?model=${model}&voice=${voice}`, {
         method: "POST",
         body: offer.sdp,
@@ -663,7 +661,7 @@ For example, after discussing food preferences, you might show hints like: "What
       await pc.setRemoteDescription({ type: "answer", sdp: answerSdp });
 
       setIsSessionActive(true);
-      setStatus("Session established successfully!");
+      // setStatus("Session established successfully!");
     } catch (err) {
       console.error("startSession error:", err);
       setStatus(`Error: ${err}`);

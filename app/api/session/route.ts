@@ -25,7 +25,7 @@ export async function POST(request: Request) {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                model: "gpt-4o-realtime-preview-2024-12-17",
+                model: "gpt-4o-realtime-preview",
                 voice: voice,
                 modalities: ["audio", "text"],
                 instructions: `Accent/Affect: Warm, encouraging, and clearly enunciated, reminiscent of a supportive English language instructor.
@@ -42,6 +42,11 @@ Personality Affect: Friendly and approachable with a professional teaching demea
 
 Start conversation with the user and use the available tools when relevant. After executing a tool, you will need to respond (create a subsequent conversation item) to the user sharing the function result or error. If you do not respond with additional message with function result, user will not know you successfully executed the tool. Speak and respond in the language of the user.`,
                 tool_choice: "auto",
+                input_audio_transcription: {
+                    language: "en",
+                    model: "gpt-4o-transcribe",
+                    prompt: `Only transcribe spoken words; exclude all non-verbal and background noises. Do NOT omit, summarize, or “clean up” anything related to spoken words. Output every word as spoken. Do NOT truncate or leave out anything in the transcript, that is spoken`
+                },
             }),
         });
 
