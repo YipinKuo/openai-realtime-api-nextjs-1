@@ -113,12 +113,12 @@ const LiveAppContent: React.FC = () => {
     // Register all functions by iterating over the object
     Object.entries(toolsFunctions).forEach(([name, func]) => {
       const functionNames: Record<string, string> = {
-        timeFunction: 'getCurrentTime',
-        backgroundFunction: 'changeBackgroundColor',
-        partyFunction: 'partyMode',
-        launchWebsite: 'launchWebsite', 
-        copyToClipboard: 'copyToClipboard',
-        scrapeWebsite: 'scrapeWebsite',
+        // timeFunction: 'getCurrentTime',
+        // backgroundFunction: 'changeBackgroundColor',
+        // partyFunction: 'partyMode',
+        // launchWebsite: 'launchWebsite', 
+        // copyToClipboard: 'copyToClipboard',
+        // scrapeWebsite: 'scrapeWebsite',
         hintsFunction: 'showHints'
       };
       

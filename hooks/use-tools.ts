@@ -190,16 +190,29 @@ export const useToolsFunctions = () => {
     }
   }
 
-  const hintsFunction = ({ hints }: { hints: string }) => {
+  const hintsFunction = ({ hints }: { hints: string | string[] }) => {
     try {
-      // Split comma-separated hints into array
-      const hintsArray = hints.split(',').map(hint => hint.trim()).filter(hint => hint.length > 0);
+      console.log('hintsFunction called with:', hints);
+      
+      // Handle both string and array inputs
+      let hintsArray: string[];
+      if (typeof hints === 'string') {
+        // Split comma-separated hints into array
+        hintsArray = hints.split(',').map(hint => hint.trim()).filter(hint => hint.length > 0);
+      } else {
+        // Already an array, just filter out empty strings
+        hintsArray = hints.filter(hint => hint && hint.trim().length > 0);
+      }
+      
+      console.log('Processed hints array:', hintsArray);
       
       // Dispatch custom event to show hints
       const event = new CustomEvent('showHints', { 
         detail: { hints: hintsArray } 
       });
       window.dispatchEvent(event);
+      
+      console.log('showHints event dispatched with:', event.detail);
       
       toast.success("💡 顯示快速回覆提示", {
         description: `已顯示 ${hintsArray.length} 個快速回覆選項`,
@@ -211,6 +224,7 @@ export const useToolsFunctions = () => {
         message: `顯示了 ${hintsArray.length} 個快速回覆提示按鈕`
       };
     } catch (error) {
+      console.error('Error in hintsFunction:', error);
       return {
         success: false,
         message: `顯示提示失敗: ${error}`

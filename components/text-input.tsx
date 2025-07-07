@@ -17,6 +17,7 @@ export function TextInput({ onSubmit, disabled = false }: TextInputProps) {
 
   useEffect(() => {
     const handleShowHints = (event: CustomEvent) => {
+      console.log('showHints event received:', event.detail)
       setHints(event.detail.hints || [])
     }
 
