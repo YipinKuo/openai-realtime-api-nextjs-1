@@ -195,15 +195,29 @@ export default function useWebRTCAudioSession(
    * Generate instruction text based on level and topic
    */
   function generateInstructionText(): string {
-    // Default fallback text if no level or topic provided
+    // Use topicName if available, otherwise use conversationTopics[0] if present
+    const effectiveTopicName = topicName || (conversationTopics && conversationTopics.length > 0 ? conversationTopics[0] : undefined);
+
+    // Use provided level, or default to 'beginner' if missing
+    const usedLevel = level || 'beginner';
+
+    // Debug logging
+    console.log("[generateInstructionText] level:", level);
+    console.log("[generateInstructionText] usedLevel:", usedLevel);
+    console.log("[generateInstructionText] topicName:", topicName);
+    console.log("[generateInstructionText] conversationTopics:", conversationTopics);
+    console.log("[generateInstructionText] effectiveTopicName:", effectiveTopicName);
+
+    // Default fallback text if no topic provided
     const defaultText = ``;
 
-    if (!level || !topicName) {
+    if (!effectiveTopicName) {
+      console.log("[generateInstructionText] Returning defaultText (empty string) - no topic");
       return defaultText;
     }
 
     let template: string;
-    switch (level) {
+    switch (usedLevel) {
       case 'beginner':
         template = BEGINNER_TEMPLATE;
         break;
@@ -214,11 +228,12 @@ export default function useWebRTCAudioSession(
         template = ADVANCED_TEMPLATE;
         break;
       default:
+        console.log("[generateInstructionText] Unknown level, returning defaultText");
         return defaultText;
     }
 
     // Replace {{topic}} placeholder with actual topic name
-    let instruction = template.replace(/\{\{topic\}\}/g, topicName);
+    let instruction = template.replace(/\{\{topic\}\}/g, effectiveTopicName);
 
     // Generate roleplay context based on conversation topic and party
     let roleplayContext = "";
@@ -237,6 +252,13 @@ export default function useWebRTCAudioSession(
     // Replace {{roleplay_context}} placeholder
     instruction = instruction.replace(/\{\{roleplay_context\}\}/g, roleplayContext);
 
+    // --- Custom: If user came from /custom, prepend a special instruction ---
+    if (conversationTopics && conversationTopics.length > 0) {
+      const customTopic = conversationTopics[0];
+      instruction = `The user wants to practice the following topic: "${customTopic}". Please focus the conversation on this topic.\n\n` + instruction;
+    }
+    // -------------------------------------------------------------
+
     // Add hint functionality instructions to all templates
     instruction += `
 
@@ -254,6 +276,7 @@ For example, after discussing food preferences, you might show hints like: "What
     // Also, add to each template:
     // "請注意：建議回覆（hints）只能透過 showHints() 函數提供，請勿在主要訊息中重複列出或說明這些選項，也不需告知使用者如何使用 hints，因為使用者已經知道。"
 
+    console.log("[generateInstructionText] Final instruction:", instruction);
     return instruction;
   }
 
@@ -293,6 +316,7 @@ For example, after discussing food preferences, you might show hints like: "What
         ],
       },
     };
+    console.log("languageMessage", languageMessage);
     dataChannel.send(JSON.stringify(languageMessage));
 
     // setTimeout(() => {

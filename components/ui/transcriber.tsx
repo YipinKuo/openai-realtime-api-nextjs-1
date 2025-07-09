@@ -95,7 +95,7 @@ function ConversationItem({ message }: { message: Conversation }) {
    >
      {/* Assistant Avatar */}
      {isAssistant && (
-       <Avatar className="w-8 h-8 shrink-0">
+       <Avatar className="hidden sm:flex w-8 h-8 shrink-0">
          {/* <AvatarImage src="/placeholder-user.jpg" /> */}
          <AvatarFallback>AI</AvatarFallback>
        </Avatar>
@@ -107,7 +107,7 @@ function ConversationItem({ message }: { message: Conversation }) {
          isUser
            ? "bg-primary text-background"
            : "bg-secondary dark:text-foreground"
-       } px-4 py-2 rounded-lg max-w-[70%] motion-preset-slide-up-right`}
+       } px-4 py-2 rounded-lg motion-preset-slide-up-right`}
      >
        {(isUser && msgStatus === "speaking") || msgStatus === "processing" ? (
          // Show wave animation for "speaking" status
@@ -128,7 +128,7 @@ function ConversationItem({ message }: { message: Conversation }) {
 
      {/* User Avatar */}
      {isUser && (
-       <Avatar className="w-8 h-8 shrink-0">
+       <Avatar className="hidden sm:flex w-8 h-8 shrink-0">
          {/* <AvatarImage src="/placeholder-user.jpg" /> */}
          <AvatarFallback>You</AvatarFallback>
        </Avatar>

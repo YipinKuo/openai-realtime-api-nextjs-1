@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useState, Suspense } from "react"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 import useWebRTCAudioSession from "@/hooks/use-webrtc"
 import { tools } from "@/lib/tools"
 import { Welcome } from "@/components/welcome"
@@ -14,6 +14,7 @@ import { TextInput } from "@/components/text-input"
 import { motion } from "framer-motion"
 import { useToolsFunctions } from "@/hooks/use-tools"
 import { Badge } from "@/components/ui/badge"
+import { ArrowLeft } from "lucide-react"
 
 interface Topic {
   id: string;
@@ -34,6 +35,8 @@ const getLevelInChinese = (level: string): string => {
 };
 
 const LiveAppContent: React.FC = () => {
+  const router = useRouter()
+  
   // Get selected avatar and determine voice
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null)
   const [voice, setVoice] = useState("alloy") // default fallback
@@ -129,11 +132,22 @@ const LiveAppContent: React.FC = () => {
   return (
     <main className="h-full">
       <motion.div 
-        className="flex flex-col items-center justify-center w-[90vw] mx-auto my-20 p-12 border rounded-lg shadow-xl"
+        className="flex flex-col items-center justify-center w-[95vw] sm:w-[90vw] mx-auto my-10 sm:my-20 p-4 sm:p-8 lg:p-12 border rounded-lg shadow-xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
+        {/* Back button */}
+        <div className="self-start mb-6">
+          <button
+            onClick={() => router.back()}
+            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            返回上一頁
+          </button>
+        </div>
+        
         {/* <Welcome /> */}
         
         {/* Display topic and level info if available */}
@@ -190,7 +204,7 @@ const LiveAppContent: React.FC = () => {
         )}
         
         <motion.div 
-          className="w-full bg-card text-card-foreground rounded-xl border shadow-sm p-6 space-y-4"
+          className="w-full bg-card text-card-foreground rounded-xl border shadow-sm p-4 sm:p-6 space-y-4"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2, duration: 0.4 }}

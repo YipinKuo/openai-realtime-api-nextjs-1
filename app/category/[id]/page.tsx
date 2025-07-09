@@ -2,6 +2,7 @@ import React from "react";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 interface Topic {
   id: string;
@@ -39,6 +40,15 @@ export default async function CategoryPage({ params }: { params: { id: string } 
 
   return (
     <main className="max-w-3xl mx-auto py-12 px-4">
+      <div className="mb-6">
+        <Link
+          href="/categories"
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          返回類別列表
+        </Link>
+      </div>
       <h1 className="text-3xl font-bold mb-8 text-center">
         {category.Emoji && <span className="text-3xl mr-3">{category.Emoji}</span>}
         {category.Name || category.name}

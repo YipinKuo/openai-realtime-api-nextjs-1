@@ -2,6 +2,8 @@ import React from "react";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { ClientLevelSelector } from "@/components/client-level-selector";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 const LEVELS = [
   {
@@ -38,5 +40,18 @@ export default async function TopicLevelPage({ params }: { params: { id: string 
 
   if (!topic) return notFound();
 
-  return <ClientLevelSelector topic={topic} />;
+  return (
+    <div className="max-w-3xl mx-auto py-12 px-4">
+      <div className="mb-6">
+        <Link
+          href="/categories"
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          返回類別列表
+        </Link>
+      </div>
+      <ClientLevelSelector topic={topic} />
+    </div>
+  );
 } 
