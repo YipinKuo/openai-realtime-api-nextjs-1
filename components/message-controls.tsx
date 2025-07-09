@@ -74,7 +74,14 @@ export function MessageControls({ conversation, msgs }: { conversation: Conversa
   const [typeFilter, setTypeFilter] = useState<string>("all")
   const [searchQuery, setSearchQuery] = useState("")
   
-  if (conversation.length === 0) return null
+  if (conversation.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <div className="text-6xl mb-4">👋</div>
+        <p className="text-lg text-muted-foreground">Say Hello! to start a conversation</p>
+      </div>
+    )
+  }
 
   // Get unique message types
   const messageTypes = ["all", ...new Set(msgs.map(msg => msg.type))]

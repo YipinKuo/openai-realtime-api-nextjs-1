@@ -1,8 +1,10 @@
 export const fr = {
     broadcast: {
         end: "Arrêter la Diffusion",
+        ending: "Arrêt en cours...",
         live: "En Direct",
-        start: "Démarrer la Diffusion"
+        start: "Démarrer la Diffusion",
+        starting: "Démarrage en cours..."
     },
     header: {
         title: "À propos",

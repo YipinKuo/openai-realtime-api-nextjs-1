@@ -38,7 +38,7 @@ interface UseWebRTCAudioSessionReturn {
   audioIndicatorRef: React.RefObject<HTMLDivElement | null>;
   startSession: () => Promise<void>;
   stopSession: () => void;
-  handleStartStopClick: () => void;
+  handleStartStopClick: () => Promise<void>;
   registerFunction: (name: string, fn: Function) => void;
   msgs: any[];
   currentVolume: number;
@@ -710,11 +710,11 @@ For example, after discussing food preferences, you might show hints like: "What
   /**
    * Toggle start/stop from a single button
    */
-  function handleStartStopClick() {
+  async function handleStartStopClick() {
     if (isSessionActive) {
       stopSession();
     } else {
-      startSession();
+      await startSession();
     }
   }
 

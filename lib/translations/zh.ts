@@ -1,8 +1,10 @@
 export const zh = {
     broadcast: {
         end: "結束對話",
+        ending: "結束中...",
         live: "對話中",
-        start: "開始對話"
+        start: "開始對話",
+        starting: "開始中..."
     },
     header: {
         title: "關於",

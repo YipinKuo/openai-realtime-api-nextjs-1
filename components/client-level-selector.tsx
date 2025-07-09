@@ -46,6 +46,11 @@ export function ClientLevelSelector({ topic }: ClientLevelSelectorProps) {
   const [selectedConversationParty, setSelectedConversationParty] = useState<string>("");
   const [conversationTopics, setConversationTopics] = useState<string[]>([]);
   const [conversationParties, setConversationParties] = useState<string[]>([]);
+  const [allLevelTopics, setAllLevelTopics] = useState<{
+    beginner: string[];
+    intermediate: string[];
+    advanced: string[];
+  }>({ beginner: [], intermediate: [], advanced: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -70,24 +75,51 @@ export function ClientLevelSelector({ topic }: ClientLevelSelectorProps) {
           console.warn("No subtopic found for topic.id:", topic.id, "in data.subtopics:", data.subtopics);
           setConversationTopics([]);
           setConversationParties([]);
+          setAllLevelTopics({ beginner: [], intermediate: [], advanced: [] });
           setError("找不到相關子主題，請聯絡管理員。");
           return;
         }
-        // Extract and split Conversation Topics and Conversation Parties fields
-        const topicsRawObj = subtopic["Conversation Topics"] || "";
+        
+        // Extract and split Conversation Parties field
         const partiesRawObj = subtopic["Conversation Parties"] || "";
-        const topicsRaw = typeof topicsRawObj === "string" ? topicsRawObj : topicsRawObj?.value || "";
         const partiesRaw = typeof partiesRawObj === "string" ? partiesRawObj : partiesRawObj?.value || "";
-        console.log("topicsRaw:", topicsRaw, "partiesRaw:", partiesRaw);
-        const topicsArr = topicsRaw.split(',').map((s: string) => s.trim()).filter(Boolean);
+        console.log("partiesRaw:", partiesRaw);
         const partiesArr = partiesRaw.split(',').map((s: string) => s.trim()).filter(Boolean);
-        setConversationTopics(topicsArr);
         setConversationParties(partiesArr);
+        
+        // Pre-load all level-specific conversation topics
+        const starterTopicsRawObj = subtopic["Starter Conversation Topics"] || "";
+        const intermediateTopicsRawObj = subtopic["Intermediate Conversation Topics"] || "";
+        const advancedTopicsRawObj = subtopic["Advanced Conversation Topics"] || "";
+        
+        const starterTopicsRaw = typeof starterTopicsRawObj === "string" ? starterTopicsRawObj : starterTopicsRawObj?.value || "";
+        const intermediateTopicsRaw = typeof intermediateTopicsRawObj === "string" ? intermediateTopicsRawObj : intermediateTopicsRawObj?.value || "";
+        const advancedTopicsRaw = typeof advancedTopicsRawObj === "string" ? advancedTopicsRawObj : advancedTopicsRawObj?.value || "";
+        
+        const starterTopicsArr = starterTopicsRaw.split(',').map((s: string) => s.trim()).filter(Boolean);
+        const intermediateTopicsArr = intermediateTopicsRaw.split(',').map((s: string) => s.trim()).filter(Boolean);
+        const advancedTopicsArr = advancedTopicsRaw.split(',').map((s: string) => s.trim()).filter(Boolean);
+        
+        console.log("Pre-loaded topics:", {
+          starter: starterTopicsArr,
+          intermediate: intermediateTopicsArr,
+          advanced: advancedTopicsArr
+        });
+        
+        setAllLevelTopics({
+          beginner: starterTopicsArr,
+          intermediate: intermediateTopicsArr,
+          advanced: advancedTopicsArr
+        });
+        
+        // Initialize with empty topics (will be set when level is selected)
+        setConversationTopics([]);
       } catch (err) {
         console.error("Error fetching or processing /api/options:", err);
         setError("載入選項時發生錯誤");
         setConversationTopics([]);
         setConversationParties([]);
+        setAllLevelTopics({ beginner: [], intermediate: [], advanced: [] });
       } finally {
         setLoading(false);
       }
@@ -98,6 +130,23 @@ export function ClientLevelSelector({ topic }: ClientLevelSelectorProps) {
   const handleLevelSelect = (level: string) => {
     setSelectedLevel(level);
     setStep(2);
+    
+    // Switch to pre-loaded topics for the selected level
+    const topicsForLevel = allLevelTopics[level as keyof typeof allLevelTopics] || [];
+    setConversationTopics(topicsForLevel);
+    
+    // Clear any previous errors
+    setError(null);
+    
+    // Check if there are topics available for this level
+    if (topicsForLevel.length === 0) {
+      const levelNames = {
+        beginner: "初級",
+        intermediate: "中級", 
+        advanced: "高級"
+      };
+      setError(`找不到${levelNames[level as keyof typeof levelNames]}對話主題，請聯絡管理員。`);
+    }
   };
 
   const handleConversationTopicSelect = (topic: string) => {
@@ -191,49 +240,55 @@ export function ClientLevelSelector({ topic }: ClientLevelSelectorProps) {
       {step === 2 && (
         <div>
           <h1 className="text-3xl font-bold mb-12 text-center">選擇對話主題</h1>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {conversationTopics.map((conversationTopic) => (
-              <Card 
-                key={conversationTopic}
-                className={`cursor-pointer transition-all hover:shadow-lg ${
-                  selectedConversationTopic === conversationTopic
-                    ? 'ring-2 ring-primary bg-primary/5' 
-                    : ''
-                }`}
-                onClick={() => handleConversationTopicSelect(conversationTopic)}
-              >
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    {conversationTopic}
-                    {selectedConversationTopic === conversationTopic && (
-                      <Check className="w-5 h-5 text-primary" />
-                    )}
-                  </CardTitle>
-                </CardHeader>
-              </Card>
-            ))}
-          </div>
-          
-          <div className="flex justify-between mt-12">
-            <Button variant="outline" onClick={() => setStep(1)}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              返回
-            </Button>
-            <div className="flex items-center gap-4">
-              {selectedConversationTopic && (
-                <Badge variant="secondary">
-                  {selectedConversationTopic}
-                </Badge>
-              )}
-              <Button 
-                onClick={handleProceed} 
-                disabled={!canProceed()}
-              >
-                下一步
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </div>
-          </div>
+          {error ? (
+            <div className="text-center text-red-500 py-16">{error}</div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {conversationTopics.map((conversationTopic) => (
+                  <Card 
+                    key={conversationTopic}
+                    className={`cursor-pointer transition-all hover:shadow-lg ${
+                      selectedConversationTopic === conversationTopic
+                        ? 'ring-2 ring-primary bg-primary/5' 
+                        : ''
+                    }`}
+                    onClick={() => handleConversationTopicSelect(conversationTopic)}
+                  >
+                    <CardHeader>
+                      <CardTitle className="flex items-center justify-between">
+                        {conversationTopic}
+                        {selectedConversationTopic === conversationTopic && (
+                          <Check className="w-5 h-5 text-primary" />
+                        )}
+                      </CardTitle>
+                    </CardHeader>
+                  </Card>
+                ))}
+              </div>
+              
+              <div className="flex justify-between mt-12">
+                <Button variant="outline" onClick={() => setStep(1)}>
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  返回
+                </Button>
+                <div className="flex items-center gap-4">
+                  {selectedConversationTopic && (
+                    <Badge variant="secondary">
+                      {selectedConversationTopic}
+                    </Badge>
+                  )}
+                  <Button 
+                    onClick={handleProceed} 
+                    disabled={!canProceed()}
+                  >
+                    下一步
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
 

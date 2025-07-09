@@ -1,8 +1,10 @@
 export const en = {
     broadcast: {
         end: "End Broadcasting",
+        ending: "Ending...",
         live: "Live",
-        start: "Start Broadcasting"
+        start: "Start Broadcasting",
+        starting: "Starting..."
     },
     header: {
         title: "About",
