@@ -239,7 +239,9 @@ export function ClientLevelSelector({ topic }: ClientLevelSelectorProps) {
       {/* Step 2: Conversation Topic Selection */}
       {step === 2 && (
         <div>
-          <h1 className="text-3xl font-bold mb-12 text-center">選擇對話主題</h1>
+          <h1 className="text-3xl font-bold mb-12 text-center">
+            {(topic.Name || topic.name) === "應試口說｜考場模擬" || (topic.Name || topic.name) === "日常會話｜表達能力" ? "備考必練主題" : "選擇對話主題"}
+          </h1>
           {error ? (
             <div className="text-center text-red-500 py-16">{error}</div>
           ) : (
