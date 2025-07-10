@@ -35,6 +35,7 @@ interface UseWebRTCAudioSessionParams {
 interface UseWebRTCAudioSessionReturn {
   status: string;
   isSessionActive: boolean;
+  isTTSLoading: boolean;
   audioIndicatorRef: React.RefObject<HTMLDivElement | null>;
   startSession: () => Promise<void>;
   stopSession: () => void;
@@ -59,6 +60,7 @@ export default function useWebRTCAudioSession(
   // Connection/session states
   const [status, setStatus] = useState("");
   const [isSessionActive, setIsSessionActive] = useState(false);
+  const [isTTSLoading, setIsTTSLoading] = useState(false);
 
   // Audio references for local mic
   // Approach A: explicitly typed as HTMLDivElement | null
@@ -486,6 +488,9 @@ For example, after discussing food preferences, you might show hints like: "What
          * Streaming AI transcripts (assistant partial)
          */
         case "response.audio_transcript.delta": {
+          // Set TTS loading to true when assistant starts speaking
+          setIsTTSLoading(true);
+          
           // Update last assistant response timestamp
           lastAssistantResponseRef.current = Date.now();
           
@@ -549,6 +554,9 @@ For example, after discussing food preferences, you might show hints like: "What
          * Mark the last assistant message as final
          */
         case "response.audio_transcript.done": {
+          // Set TTS loading to false when assistant finishes speaking
+          setIsTTSLoading(false);
+          
           setConversation((prev) => {
             if (prev.length === 0) return prev;
             const updated = [...prev];
@@ -792,6 +800,7 @@ For example, after discussing food preferences, you might show hints like: "What
 
     setCurrentVolume(0);
     setIsSessionActive(false);
+    setIsTTSLoading(false);
     setStatus("Session stopped");
     setMsgs([]);
     setConversation([]);
@@ -885,6 +894,7 @@ For example, after discussing food preferences, you might show hints like: "What
   return {
     status,
     isSessionActive,
+    isTTSLoading,
     audioIndicatorRef,
     startSession,
     stopSession,

@@ -100,7 +100,8 @@ const LiveAppContent: React.FC = () => {
     msgs,
     conversation,
     sendTextMessage,
-    countdownSeconds
+    countdownSeconds,
+    isTTSLoading
   } = useWebRTCAudioSession({
     voice,
     tools,
@@ -254,6 +255,7 @@ const LiveAppContent: React.FC = () => {
           <TextInput 
             onSubmit={sendTextMessage}
             disabled={!isSessionActive}
+            isTTSLoading={isTTSLoading}
           />
         </motion.div>
         

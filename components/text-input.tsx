@@ -5,13 +5,15 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Send } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { VoiceInput } from "@/components/voice-input"
 
 interface TextInputProps {
   onSubmit: (text: string) => void
   disabled?: boolean
+  isTTSLoading?: boolean
 }
 
-export function TextInput({ onSubmit, disabled = false }: TextInputProps) {
+export function TextInput({ onSubmit, disabled = false, isTTSLoading = false }: TextInputProps) {
   const [text, setText] = useState("")
   const [hints, setHints] = useState<string[]>([])
 
@@ -45,6 +47,10 @@ export function TextInput({ onSubmit, disabled = false }: TextInputProps) {
     setHints([])
   }
 
+  const handleVoiceInput = (voiceText: string) => {
+    onSubmit(voiceText)
+  }
+
   return (
     <div className="w-full space-y-3">
       {/* Hint buttons */}
@@ -75,6 +81,19 @@ export function TextInput({ onSubmit, disabled = false }: TextInputProps) {
           </div>
         </div>
       )}
+      
+      {/* Voice Input */}
+      <div className="flex justify-center">
+        <VoiceInput 
+          onVoiceInput={handleVoiceInput}
+          disabled={disabled}
+          isTTSLoading={isTTSLoading}
+        />
+      </div>
+      
+      <div className="text-center text-sm text-muted-foreground">
+        或輸入文字
+      </div>
       
       {/* Text input form */}
       <form onSubmit={handleSubmit} className="flex w-full gap-2">
