@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef, useEffect } from "react"
+import React, { useState, useRef, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Mic, MicOff, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -87,6 +87,32 @@ export function VoiceInput({
     }
   }, [isRecording])
 
+  const stopRecording = useCallback(() => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop()
+      setIsRecording(false)
+      setIsProcessing(true)
+
+      // Stop speech recognition
+      recognitionRef.current?.stop()
+
+      // Clear recording timer
+      if (recordingIntervalRef.current) {
+        clearInterval(recordingIntervalRef.current)
+        recordingIntervalRef.current = null
+      }
+
+      // Process the transcript
+      if (transcript.trim()) {
+        onVoiceInput(transcript.trim())
+      }
+      
+      setTranscript("")
+      setRecordingTime(0)
+      setIsProcessing(false)
+    }
+  }, [isRecording, transcript, onVoiceInput])
+
   const startLongPressTimer = () => {
     setIsLongPressing(true)
     longPressTimerRef.current = setTimeout(() => {
@@ -134,32 +160,6 @@ export function VoiceInput({
     } catch (error) {
       console.error('Error starting recording:', error)
       setIsRecording(false)
-    }
-  }
-
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop()
-      setIsRecording(false)
-      setIsProcessing(true)
-
-      // Stop speech recognition
-      recognitionRef.current?.stop()
-
-      // Clear recording timer
-      if (recordingIntervalRef.current) {
-        clearInterval(recordingIntervalRef.current)
-        recordingIntervalRef.current = null
-      }
-
-      // Process the transcript
-      if (transcript.trim()) {
-        onVoiceInput(transcript.trim())
-      }
-      
-      setTranscript("")
-      setRecordingTime(0)
-      setIsProcessing(false)
     }
   }
 
@@ -247,7 +247,7 @@ export function VoiceInput({
       {/* Transcript display */}
       {transcript && (
         <div className="flex-1 text-sm text-muted-foreground">
-          "{transcript}"
+          &ldquo;{transcript}&rdquo;
         </div>
       )}
 
