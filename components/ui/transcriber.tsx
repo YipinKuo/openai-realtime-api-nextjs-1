@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import ThreeDotsWave from "@/components/ui/three-dots-wave";
 import { Conversation } from "@/lib/conversations";
 import { useTranslations } from "@/components/translations-context";
+import { useTranslation } from "@/hooks/use-translation";
 
 /**
 * Avatar building blocks with Radix
@@ -85,6 +86,21 @@ function ConversationItem({ message }: { message: Conversation }) {
  const isUser = message.role === "user";
  const isAssistant = message.role === "assistant";
  const msgStatus = message.status;
+ const { translate, isTranslating } = useTranslation();
+ const [translation, setTranslation] = React.useState<string | null>(null);
+
+ // Translate message when it becomes final
+ React.useEffect(() => {
+   if (message.isFinal && message.text && message.text.trim().length > 0) {
+     const translateMessage = async () => {
+       const result = await translate(message.text);
+       if (result) {
+         setTranslation(result);
+       }
+     };
+     translateMessage();
+   }
+ }, [message.isFinal, message.text, translate]);
 
  return (
    <motion.div
@@ -107,18 +123,36 @@ function ConversationItem({ message }: { message: Conversation }) {
          isUser
            ? "bg-primary text-background"
            : "bg-secondary dark:text-foreground"
-       } px-4 py-2 rounded-lg motion-preset-slide-up-right`}
+       } px-4 py-2 rounded-lg motion-preset-slide-up-right max-w-xs sm:max-w-md`}
      >
        {(isUser && msgStatus === "speaking") || msgStatus === "processing" ? (
          // Show wave animation for "speaking" status
          <ThreeDotsWave />
        ) : (
-         // Otherwise, show the message text or final text)
-         <p>{message.text}</p>
+         // Otherwise, show the message text or final text
+         <div className="space-y-2">
+           <p className="text-sm">{message.text}</p>
+           
+           {/* Translation */}
+           {message.isFinal && message.text && message.text.trim().length > 0 && (
+             <div className="border-t border-current/20 pt-2">
+               {isTranslating(message.text) ? (
+                 <div className="text-xs opacity-70 flex items-center gap-1">
+                   <span className="animate-pulse">⏳</span>
+                   翻譯中...
+                 </div>
+               ) : translation ? (
+                 <div className="text-xs opacity-70 font-medium">
+                  {translation}
+                 </div>
+               ) : null}
+             </div>
+           )}
+         </div>
        )}
 
        {/* Timestamp below */}
-       <div className="text-xs text-muted-foreground">
+       <div className="text-xs text-muted-foreground mt-2">
          {new Date(message.timestamp).toLocaleTimeString("en-US", {
            hour: "numeric",
            minute: "numeric",
