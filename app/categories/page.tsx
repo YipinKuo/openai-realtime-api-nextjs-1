@@ -59,7 +59,11 @@ export default async function CategoriesPage() {
               {cat.Emoji && <span className="text-3xl mr-3">{cat.Emoji}</span>}
               <span className="text-xl font-semibold">{cat.Name || cat.name}</span>
             </div>
-            {cat.Description && <div className="text-muted-foreground mb-2">{cat.Description}</div>}
+            {cat.Description && (
+              <div className="text-muted-foreground mb-2 whitespace-pre-line">
+                {cat.Description}
+              </div>
+            )}
             {/* Add more fields as needed */}
           </Link>
         ))}
