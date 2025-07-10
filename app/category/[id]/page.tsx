@@ -53,7 +53,11 @@ export default async function CategoryPage({ params }: { params: { id: string } 
         {category.Emoji && <span className="text-3xl mr-3">{category.Emoji}</span>}
         {category.Name || category.name}
       </h1>
-      {category.Description && <div className="text-muted-foreground mb-8 text-center">{category.Description}</div>}
+      {category.Description && (
+        <div className="text-muted-foreground mb-8 text-center whitespace-pre-line">
+          {category.Description}
+        </div>
+      )}
       <h2 className="text-2xl font-semibold mb-4">主題列表</h2>
       <div className="grid grid-cols-1 gap-6">
         {topics.length === 0 && <div className="text-muted-foreground">此類別下暫無主題。</div>}
