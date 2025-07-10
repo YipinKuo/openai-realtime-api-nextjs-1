@@ -74,6 +74,16 @@ export function ClientLevelSelector({ topic }: ClientLevelSelectorProps) {
     return result;
   };
 
+  // Helper: Shuffle an array
+  function shuffleArray<T>(array: T[]): T[] {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
   useEffect(() => {
     const fetchSubtopicOptions = async () => {
       setLoading(true);
@@ -125,7 +135,9 @@ export function ClientLevelSelector({ topic }: ClientLevelSelectorProps) {
     setStep(2);
     // Switch to pre-loaded topics for the selected level
     const topicsForLevel = allLevelTopics[level as keyof typeof allLevelTopics] || [];
-    setConversationTopics(topicsForLevel);
+    // Shuffle and pick 6
+    const randomSix = shuffleArray(topicsForLevel).slice(0, 6);
+    setConversationTopics(randomSix);
     setSelectedConversationTopic(null);
     setSelectedConversationParty("");
     setError(null);
