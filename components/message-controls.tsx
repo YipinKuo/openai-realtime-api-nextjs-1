@@ -78,12 +78,7 @@ export function MessageControls({ conversation, msgs, countdownSeconds }: { conv
   const currentCountdown = countdownSeconds ?? null;
   
   if (conversation.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="text-6xl mb-4">👋</div>
-        <p className="text-lg text-muted-foreground">Say Hello! to start a conversation</p>
-      </div>
-    )
+    return null;
   }
 
   // Get unique message types
