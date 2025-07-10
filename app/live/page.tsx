@@ -99,7 +99,8 @@ const LiveAppContent: React.FC = () => {
     handleStartStopClick,
     msgs,
     conversation,
-    sendTextMessage
+    sendTextMessage,
+    countdownSeconds
   } = useWebRTCAudioSession({
     voice,
     tools,
@@ -245,6 +246,7 @@ const LiveAppContent: React.FC = () => {
           <MessageControls 
             conversation={conversation}
             msgs={msgs}
+            countdownSeconds={countdownSeconds}
           />
           
           {/* <ToolsEducation /> */}

@@ -69,10 +69,13 @@ function FilterControls({
   )
 }
 
-export function MessageControls({ conversation, msgs }: { conversation: Conversation[], msgs: MessageType[] }) {
+export function MessageControls({ conversation, msgs, countdownSeconds }: { conversation: Conversation[], msgs: MessageType[], countdownSeconds?: number | null }) {
   const { t } = useTranslations();
   const [typeFilter, setTypeFilter] = useState<string>("all")
   const [searchQuery, setSearchQuery] = useState("")
+  
+  // Default countdownSeconds to null if not provided
+  const currentCountdown = countdownSeconds ?? null;
   
   if (conversation.length === 0) {
     return (
@@ -96,6 +99,16 @@ export function MessageControls({ conversation, msgs }: { conversation: Conversa
 
   return (
     <div className="space-y-2">
+      {/* Countdown UI */}
+      {currentCountdown !== null && currentCountdown > 0 && (
+        <div className="fixed top-4 right-4 z-50 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg animate-pulse">
+          <div className="text-center">
+            <div className="text-sm font-medium">請回覆</div>
+            <div className="text-2xl font-bold">{currentCountdown}s</div>
+          </div>
+        </div>
+      )}
+      
       <div className="flex justify-between items-center">
         {/* <h3 className="text-sm font-medium">{t('messageControls.logs')}</h3> */}
         {process.env.NODE_ENV === 'development' && (

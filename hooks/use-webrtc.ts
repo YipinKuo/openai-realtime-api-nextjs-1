@@ -44,6 +44,7 @@ interface UseWebRTCAudioSessionReturn {
   currentVolume: number;
   conversation: Conversation[];
   sendTextMessage: (text: string) => void;
+  countdownSeconds: number | null;
 }
 
 /**
@@ -82,6 +83,12 @@ export default function useWebRTCAudioSession(
   const [currentVolume, setCurrentVolume] = useState(0);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const volumeIntervalRef = useRef<number | null>(null);
+
+  // Timeout tracking for assistant responses
+  const lastAssistantResponseRef = useRef<number | null>(null);
+  const responseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [countdownSeconds, setCountdownSeconds] = useState<number | null>(null);
 
   /**
    * We track only the ephemeral user message **ID** here.
@@ -460,6 +467,39 @@ For example, after discussing food preferences, you might show hints like: "What
          * Streaming AI transcripts (assistant partial)
          */
         case "response.audio_transcript.delta": {
+          // Update last assistant response timestamp
+          lastAssistantResponseRef.current = Date.now();
+          
+          // Clear existing timeout and countdown
+          if (responseTimeoutRef.current) {
+            clearTimeout(responseTimeoutRef.current);
+            responseTimeoutRef.current = null;
+          }
+          if (countdownIntervalRef.current) {
+            clearInterval(countdownIntervalRef.current);
+            countdownIntervalRef.current = null;
+          }
+          setCountdownSeconds(null);
+          
+          // Set new timeout for 30 seconds
+          responseTimeoutRef.current = setTimeout(() => {
+            // Start countdown after 15 seconds of inactivity
+            setCountdownSeconds(15);
+            
+            // Start countdown interval
+            countdownIntervalRef.current = setInterval(() => {
+              setCountdownSeconds(prev => {
+                if (prev === null) return null;
+                if (prev <= 1) {
+                  // End conversation after 30 seconds total (15 + 15)
+                  stopSession();
+                  return null;
+                }
+                return prev - 1;
+              });
+            }, 1000);
+          }, 15000);
+
           const newMessage: Conversation = {
             id: uuidv4(), // generate a fresh ID for each assistant partial
             role: "assistant",
@@ -718,6 +758,15 @@ For example, after discussing food preferences, you might show hints like: "What
       clearInterval(volumeIntervalRef.current);
       volumeIntervalRef.current = null;
     }
+    if (responseTimeoutRef.current) {
+      clearTimeout(responseTimeoutRef.current);
+      responseTimeoutRef.current = null;
+    }
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+    }
+    setCountdownSeconds(null);
     analyserRef.current = null;
 
     ephemeralUserMessageIdRef.current = null;
@@ -815,5 +864,6 @@ For example, after discussing food preferences, you might show hints like: "What
     currentVolume,
     conversation,
     sendTextMessage,
+    countdownSeconds,
   };
 }
