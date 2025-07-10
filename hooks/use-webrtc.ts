@@ -289,6 +289,11 @@ For example, after discussing food preferences, you might show hints like: "What
 
   /**
    * Configure the data channel on open, sending a session update to the server.
+   * This function triggers the AI to speak first by:
+   * 1. Sending session configuration
+   * 2. Sending instruction text as a system message first
+   * 3. Sending an initial user message to trigger AI response
+   * 4. Sending response.create to start the AI's response
    */
   function configureDataChannel(dataChannel: RTCDataChannel) {
     console.log("configureDataChannel");
@@ -309,12 +314,12 @@ For example, after discussing food preferences, you might show hints like: "What
     console.log("Session update sent:", sessionUpdate);
     console.log("Setting locale: " + t("language") + " : " + locale);
 
-    // Send language preference message with dynamic instruction text
-    const languageMessage = {
+    // Send the instruction text as a system message first
+    const instructionMessage = {
       type: "conversation.item.create",
       item: {
         type: "message",
-        role: "user",
+        role: "system",
         content: [
           {
             type: "input_text",
@@ -323,29 +328,32 @@ For example, after discussing food preferences, you might show hints like: "What
         ],
       },
     };
-    console.log("languageMessage", languageMessage);
-    dataChannel.send(JSON.stringify(languageMessage));
+    console.log("Instruction message:", instructionMessage);
+    dataChannel.send(JSON.stringify(instructionMessage));
 
-    // setTimeout(() => {
-    //   // Send language preference message with dynamic instruction text
-    //   const languageMessage2 = {
-    //     "type": "response.create",
-    //     "response": {
-    //       input: [{
-    //         type: "message",
-    //         role: "user",
-    //         content: [
-    //           {
-    //             type: "input_text",
-    //             text: "Hello!",
-    //           },
-    //         ],
-    //       }],
-    //     }
-    //   };
+    // Send initial conversation item to trigger AI to speak first
+    const effectiveTopicName = topicName || (conversationTopics && conversationTopics.length > 0 ? conversationTopics[0] : "conversation");
+    const initialMessage = {
+      type: "conversation.item.create",
+      item: {
+        type: "message",
+        role: "user",
+        content: [
+          {
+            type: "input_text",
+            text: `Hello, I'm ready to start our ${effectiveTopicName} conversation. Please begin by introducing yourself and starting the conversation.`,
+          },
+        ],
+      },
+    };
+    console.log("Initial message to trigger AI:", initialMessage);
+    dataChannel.send(JSON.stringify(initialMessage));
 
-    //   dataChannel.send(JSON.stringify(languageMessage2));
-    // }, 1000);
+    // Send response.create to trigger the AI response
+    const responseCreate = {
+      type: "response.create",
+    };
+    dataChannel.send(JSON.stringify(responseCreate));
   }
 
   /**
@@ -410,6 +418,17 @@ For example, after discussing food preferences, you might show hints like: "What
          * User speech started
          */
         case "input_audio_buffer.speech_started": {
+          // Reset countdown when user starts speaking
+          if (responseTimeoutRef.current) {
+            clearTimeout(responseTimeoutRef.current);
+            responseTimeoutRef.current = null;
+          }
+          if (countdownIntervalRef.current) {
+            clearInterval(countdownIntervalRef.current);
+            countdownIntervalRef.current = null;
+          }
+          setCountdownSeconds(null);
+          
           getOrCreateEphemeralUserId();
           updateEphemeralUserMessage({ status: "speaking" });
           break;
@@ -797,6 +816,17 @@ For example, after discussing food preferences, you might show hints like: "What
       console.error("Data channel not ready");
       return;
     }
+
+    // Reset countdown when user sends a text message
+    if (responseTimeoutRef.current) {
+      clearTimeout(responseTimeoutRef.current);
+      responseTimeoutRef.current = null;
+    }
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+    }
+    setCountdownSeconds(null);
 
     const messageId = uuidv4();
 
