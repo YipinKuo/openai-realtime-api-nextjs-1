@@ -36,6 +36,7 @@ interface Topic {
 
 interface ClientLevelSelectorProps {
   topic: Topic;
+  hideParties?: boolean; // Add this prop
 }
 
 // New type for parsed topic
@@ -45,7 +46,7 @@ interface ParsedTopic {
   raw: string; // original string for lookup
 }
 
-export function ClientLevelSelector({ topic }: ClientLevelSelectorProps) {
+export function ClientLevelSelector({ topic, hideParties = false }: ClientLevelSelectorProps) {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [selectedLevel, setSelectedLevel] = useState<string>("");
@@ -130,6 +131,26 @@ export function ClientLevelSelector({ topic }: ClientLevelSelectorProps) {
     fetchSubtopicOptions();
   }, [topic.id]);
 
+  // Add effect to auto-skip party selection if hideParties is true
+  useEffect(() => {
+    if (
+      hideParties &&
+      step === 2 &&
+      selectedConversationTopic &&
+      selectedConversationTopic.parties.includes("考生")
+    ) {
+      setSelectedConversationParty("考生");
+      // Immediately proceed to /live
+      const params = new URLSearchParams({
+        topicId: topic.id,
+        level: selectedLevel,
+        conversationTopic: selectedConversationTopic.topic,
+        conversationParty: "考生",
+      });
+      router.push(`/live?${params.toString()}`);
+    }
+  }, [hideParties, step, selectedConversationTopic, selectedLevel, topic.id, router]);
+
   const handleLevelSelect = (level: string) => {
     setSelectedLevel(level);
     setStep(2);
@@ -162,13 +183,24 @@ export function ClientLevelSelector({ topic }: ClientLevelSelectorProps) {
 
   const handleProceed = () => {
     if (step === 2 && selectedConversationTopic) {
-      setStep(3);
+      if (hideParties && selectedConversationTopic.parties.includes("考生")) {
+        setSelectedConversationParty("考生");
+        const params = new URLSearchParams({
+          topicId: topic.id,
+          level: selectedLevel,
+          conversationTopic: selectedConversationTopic.topic,
+          conversationParty: "考生",
+        });
+        router.push(`/live?${params.toString()}`);
+      } else {
+        setStep(3);
+      }
     } else if (step === 3 && selectedConversationTopic && selectedConversationParty) {
       const params = new URLSearchParams({
         topicId: topic.id,
         level: selectedLevel,
         conversationTopic: selectedConversationTopic.topic,
-        conversationParty: selectedConversationParty
+        conversationParty: selectedConversationParty,
       });
       router.push(`/live?${params.toString()}`);
     }
@@ -297,7 +329,7 @@ export function ClientLevelSelector({ topic }: ClientLevelSelectorProps) {
       )}
 
       {/* Step 3: Conversation Party Selection */}
-      {step === 3 && selectedConversationTopic && (
+      {!hideParties && step === 3 && selectedConversationTopic && (
         <div>
           <h1 className="text-3xl font-bold mb-12 text-center">選擇對話角色</h1>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

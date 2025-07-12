@@ -51,7 +51,7 @@ export default async function TopicLevelPage({ params }: { params: { id: string 
           返回類別列表
         </Link>
       </div>
-      <ClientLevelSelector topic={topic} />
+      <ClientLevelSelector topic={topic} hideParties={true} />
     </div>
   );
 } 

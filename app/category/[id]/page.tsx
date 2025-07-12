@@ -64,7 +64,7 @@ export default async function CategoryPage({ params }: { params: { id: string } 
         {topics.map((topic) => (
           <Link
             key={topic.id}
-            href={`/topic/${topic.id}`}
+            href={`/subtopics/${topic.id}`}
             className="rounded-lg border p-4 bg-background shadow-sm flex items-start cursor-pointer hover:shadow-md transition focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <div className="flex flex-col w-full">
