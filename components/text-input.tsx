@@ -11,9 +11,10 @@ interface TextInputProps {
   onSubmit: (text: string) => void
   disabled?: boolean
   isTTSLoading?: boolean
+  showMicrophone?: boolean
 }
 
-export function TextInput({ onSubmit, disabled = false, isTTSLoading = false }: TextInputProps) {
+export function TextInput({ onSubmit, disabled = false, isTTSLoading = false, showMicrophone = true }: TextInputProps) {
   const [text, setText] = useState("")
   const [hints, setHints] = useState<string[]>([])
 
@@ -83,17 +84,21 @@ export function TextInput({ onSubmit, disabled = false, isTTSLoading = false }: 
       )}
       
       {/* Voice Input */}
-      <div className="flex justify-center">
-        <VoiceInput 
-          onVoiceInput={handleVoiceInput}
-          disabled={disabled}
-          isTTSLoading={isTTSLoading}
-        />
-      </div>
-      
-      <div className="text-center text-sm text-muted-foreground">
-        或輸入文字
-      </div>
+      {showMicrophone && (
+        <>
+          <div className="flex justify-center">
+            <VoiceInput 
+              onVoiceInput={handleVoiceInput}
+              disabled={disabled}
+              isTTSLoading={isTTSLoading}
+            />
+          </div>
+          
+          <div className="text-center text-sm text-muted-foreground">
+            或輸入文字
+          </div>
+        </>
+      )}
       
       {/* Text input form */}
       <form onSubmit={handleSubmit} className="flex w-full gap-2">

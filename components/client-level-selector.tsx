@@ -37,6 +37,7 @@ interface Topic {
 interface ClientLevelSelectorProps {
   topic: Topic;
   hideParties?: boolean; // Add this prop
+  subtopic?: { id: string; name?: string; description?: string };
 }
 
 // New type for parsed topic
@@ -46,7 +47,7 @@ interface ParsedTopic {
   raw: string; // original string for lookup
 }
 
-export function ClientLevelSelector({ topic, hideParties = false }: ClientLevelSelectorProps) {
+export function ClientLevelSelector({ topic, hideParties = false, subtopic }: ClientLevelSelectorProps) {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [selectedLevel, setSelectedLevel] = useState<string>("");
@@ -83,6 +84,16 @@ export function ClientLevelSelector({ topic, hideParties = false }: ClientLevelS
       [arr[i], arr[j]] = [arr[j], arr[i]];
     }
     return arr;
+  }
+
+  // Update all router.push calls to include subtopic context if present
+  function buildParams(params: Record<string, string>) {
+    if (subtopic) {
+      if (subtopic.id) params.subtopicId = subtopic.id;
+      if (subtopic.name) params.subtopicName = subtopic.name;
+      if (subtopic.description) params.subtopicDescription = subtopic.description;
+    }
+    return new URLSearchParams(params);
   }
 
   useEffect(() => {
@@ -141,7 +152,7 @@ export function ClientLevelSelector({ topic, hideParties = false }: ClientLevelS
     ) {
       setSelectedConversationParty("考生");
       // Immediately proceed to /live
-      const params = new URLSearchParams({
+      const params = buildParams({
         topicId: topic.id,
         level: selectedLevel,
         conversationTopic: selectedConversationTopic.topic,
@@ -185,7 +196,7 @@ export function ClientLevelSelector({ topic, hideParties = false }: ClientLevelS
     if (step === 2 && selectedConversationTopic) {
       if (hideParties && selectedConversationTopic.parties.includes("考生")) {
         setSelectedConversationParty("考生");
-        const params = new URLSearchParams({
+        const params = buildParams({
           topicId: topic.id,
           level: selectedLevel,
           conversationTopic: selectedConversationTopic.topic,
@@ -196,7 +207,7 @@ export function ClientLevelSelector({ topic, hideParties = false }: ClientLevelS
         setStep(3);
       }
     } else if (step === 3 && selectedConversationTopic && selectedConversationParty) {
-      const params = new URLSearchParams({
+      const params = buildParams({
         topicId: topic.id,
         level: selectedLevel,
         conversationTopic: selectedConversationTopic.topic,

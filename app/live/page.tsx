@@ -47,6 +47,9 @@ const LiveAppContent: React.FC = () => {
   const level = searchParams.get('level')
   const conversationTopic = searchParams.get('conversationTopic')
   const conversationParty = searchParams.get('conversationParty')
+  const subtopicId = searchParams.get('subtopicId')
+  const subtopicName = searchParams.get('subtopicName')
+  const subtopicDescription = searchParams.get('subtopicDescription')
   
   // State for topic data
   const [topic, setTopic] = useState<Topic | null>(null)
@@ -108,7 +111,8 @@ const LiveAppContent: React.FC = () => {
     level: level || undefined,
     topicName: topicName || undefined,
     conversationTopics: conversationTopic ? [conversationTopic] : [],
-    conversationParties: conversationParty ? [conversationParty] : []
+    conversationParties: conversationParty ? [conversationParty] : [],
+    subtopic: subtopicName ? { id: subtopicId || undefined, name: subtopicName || undefined, description: subtopicDescription || undefined } : undefined
   })
 
   // Get all tools functions
@@ -130,6 +134,40 @@ const LiveAppContent: React.FC = () => {
       registerFunction(functionNames[name], func);
     });
   }, [registerFunction, toolsFunctions])
+
+  // Render topic/subtopic heading
+  const renderHeading = () => {
+    if (subtopicName) {
+      return (
+        <>
+          <div className="text-muted-foreground text-center text-sm mb-2">
+            {topic?.Emoji && <span className="text-xl mr-2 align-middle">{topic.Emoji}</span>}
+            {topicName}
+          </div>
+          <h1 className="text-3xl font-bold mb-4 text-center">
+            {subtopicName}
+          </h1>
+          {subtopicDescription && (
+            <div className="text-muted-foreground mb-3 text-center whitespace-pre-line">
+              {subtopicDescription}
+            </div>
+          )}
+        </>
+      );
+    } else {
+      return (
+        <>
+          <div className="flex items-center justify-center gap-2 mb-2">
+            {topic?.Emoji && <span className="text-2xl">{topic.Emoji}</span>}
+            <h1 className="text-2xl font-bold">{topicName}</h1>
+          </div>
+          {topic?.Description && (
+            <div className="text-sm text-muted-foreground mb-3">{topic.Description}</div>
+          )}
+        </>
+      );
+    }
+  };
 
   return (
     <main className="h-full">
@@ -160,27 +198,9 @@ const LiveAppContent: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1, duration: 0.4 }}
           >
-            {topic && (
-              <div className="flex items-center justify-center gap-2 mb-2">
-                {topic.Emoji && <span className="text-2xl">{topic.Emoji}</span>}
-                <h1 className="text-2xl font-bold">{topicName}</h1>
-              </div>
-            )}
-            
-            {level && (
-              <div className="text-sm text-muted-foreground mb-2">
-                等級: {getLevelInChinese(level)}
-              </div>
-            )}
-            
-            {topic?.Description && (
-              <div className="text-sm text-muted-foreground mb-3">
-                {topic.Description}
-              </div>
-            )}
-            
+            {renderHeading()}
             {/* Display selected conversation topic */}
-            {conversationTopic && (
+            {conversationTopic && !subtopicName && (
               <div className="mb-3">
                 <div className="text-sm font-medium text-muted-foreground mb-1">對話主題:</div>
                 <div className="flex justify-center">
@@ -190,7 +210,6 @@ const LiveAppContent: React.FC = () => {
                 </div>
               </div>
             )}
-            
             {/* Display selected conversation party */}
             {conversationParty && (
               <div className="mb-3">
@@ -256,6 +275,7 @@ const LiveAppContent: React.FC = () => {
             onSubmit={sendTextMessage}
             disabled={!isSessionActive}
             isTTSLoading={isTTSLoading}
+            showMicrophone={false}
           />
         </motion.div>
         

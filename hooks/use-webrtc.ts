@@ -26,6 +26,7 @@ interface UseWebRTCAudioSessionParams {
   topicName?: string;
   conversationTopics?: string[];
   conversationParties?: string[];
+  subtopic?: { id?: string; name?: string; description?: string };
 }
 
 /**
@@ -54,7 +55,7 @@ interface UseWebRTCAudioSessionReturn {
 export default function useWebRTCAudioSession(
   params: UseWebRTCAudioSessionParams,
 ): UseWebRTCAudioSessionReturn {
-  const { voice, tools, level, topicName, conversationTopics, conversationParties } = params;
+  const { voice, tools, level, topicName, conversationTopics, conversationParties, subtopic } = params;
   const { t, locale } = useTranslations();
   const router = useRouter();
   // Connection/session states
@@ -243,6 +244,11 @@ export default function useWebRTCAudioSession(
 
     // Replace {{topic}} placeholder with actual topic name
     let instruction = template.replace(/\{\{topic\}\}/g, effectiveTopicName);
+
+    // If subtopic context is present, add it to the instruction
+    if (subtopic && (subtopic.name || subtopic.description)) {
+      instruction = `【子主題】${subtopic.name || ''}${subtopic.description ? '：' + subtopic.description : ''}\n` + instruction;
+    }
 
     // Generate roleplay context based on conversation topic and party
     let roleplayContext = "";
