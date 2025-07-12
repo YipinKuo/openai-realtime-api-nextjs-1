@@ -51,7 +51,7 @@ export default async function SubtopicSelectionPage({ params }: { params: { topi
         {subtopics.map((subtopic) => (
           <Link
             key={subtopic.id}
-            href={`/topic/${topicId}`}
+            href={`/topic/${topicId}?subtopicId=${subtopic.id}`}
             className="rounded-lg border p-4 bg-background shadow-sm flex items-start cursor-pointer hover:shadow-md transition focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <div className="flex flex-col w-full">

@@ -232,12 +232,6 @@ export function ClientLevelSelector({ topic, hideParties = false }: ClientLevelS
 
   return (
     <main className="max-w-4xl mx-auto py-16 px-4">
-      {/* Topic Header */}
-      <div className="mb-10 text-center">
-        {topic.Emoji && <span className="text-4xl mr-2 align-middle">{topic.Emoji}</span>}
-        <span className="text-3xl font-bold align-middle">{topic.Name || topic.name}</span>
-        {topic.Description && <div className="text-muted-foreground mt-2 text-lg">{topic.Description}</div>}
-      </div>
 
       {/* Progress Steps */}
       <div className="flex justify-center mb-8">

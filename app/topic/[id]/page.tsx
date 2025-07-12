@@ -34,9 +34,26 @@ async function getTopic(topicId: string) {
   return data.topic || null;
 }
 
-export default async function TopicLevelPage({ params }: { params: { id: string } }) {
+async function getSubtopic(subtopicId: string) {
+  const h = await headers();
+  const host = h.get("host");
+  const protocol = process.env.VERCEL ? "https" : "http";
+  const url = `${protocol}://${host}/api/options`;
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch data");
+  const data = await res.json();
+  const subtopic = (data.subtopics || []).find((sub: any) => sub.id === subtopicId);
+  return subtopic || null;
+}
+
+export default async function TopicLevelPage({ params, searchParams }: { params: { id: string }, searchParams?: { subtopicId?: string } }) {
   const { id } = params;
+  const subtopicId = searchParams?.subtopicId;
   const topic = await getTopic(id);
+  let subtopic = null;
+  if (subtopicId) {
+    subtopic = await getSubtopic(subtopicId);
+  }
 
   if (!topic) return notFound();
 
@@ -51,6 +68,33 @@ export default async function TopicLevelPage({ params }: { params: { id: string 
           返回類別列表
         </Link>
       </div>
+      {subtopic ? (
+        <>
+          <div className="text-muted-foreground text-center text-sm mb-2">
+            {topic.Emoji && <span className="text-xl mr-2 align-middle">{topic.Emoji}</span>}
+            {topic.Name || topic.name}
+          </div>
+          <h1 className="text-3xl font-bold mb-4 text-center">
+            {subtopic.Emoji && <span className="text-3xl mr-3">{subtopic.Emoji}</span>}
+            {subtopic.Name || subtopic.name}
+          </h1>
+          {subtopic.Description && (
+            <div className="text-muted-foreground mb-8 text-center whitespace-pre-line">
+              {subtopic.Description}
+            </div>
+          )}
+        </>
+      ) : (
+        <h1 className="text-3xl font-bold mb-8 text-center">
+          {topic.Emoji && <span className="text-3xl mr-3">{topic.Emoji}</span>}
+          {topic.Name || topic.name}
+        </h1>
+      )}
+      {!subtopic && topic.Description && (
+        <div className="text-muted-foreground mb-8 text-center whitespace-pre-line">
+          {topic.Description}
+        </div>
+      )}
       <ClientLevelSelector topic={topic} hideParties={true} />
     </div>
   );
