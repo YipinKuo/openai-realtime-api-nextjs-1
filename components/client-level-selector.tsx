@@ -147,8 +147,7 @@ export function ClientLevelSelector({ topic, hideParties = false, subtopic }: Cl
     if (
       hideParties &&
       step === 2 &&
-      selectedConversationTopic &&
-      selectedConversationTopic.parties.includes("考生")
+      selectedConversationTopic
     ) {
       setSelectedConversationParty("考生");
       // Immediately proceed to /live
@@ -161,6 +160,14 @@ export function ClientLevelSelector({ topic, hideParties = false, subtopic }: Cl
       router.push(`/live?${params.toString()}`);
     }
   }, [hideParties, step, selectedConversationTopic, selectedLevel, topic.id, router]);
+
+  // Add logging for debugging
+  useEffect(() => {
+    console.log('[CLS] step:', step);
+    console.log('[CLS] selectedConversationTopic:', selectedConversationTopic);
+    console.log('[CLS] selectedConversationParty:', selectedConversationParty);
+    console.log('[CLS] hideParties:', hideParties);
+  }, [step, selectedConversationTopic, selectedConversationParty, hideParties]);
 
   const handleLevelSelect = (level: string) => {
     setSelectedLevel(level);
@@ -194,7 +201,7 @@ export function ClientLevelSelector({ topic, hideParties = false, subtopic }: Cl
 
   const handleProceed = () => {
     if (step === 2 && selectedConversationTopic) {
-      if (hideParties && selectedConversationTopic.parties.includes("考生")) {
+      if (hideParties) {
         setSelectedConversationParty("考生");
         const params = buildParams({
           topicId: topic.id,

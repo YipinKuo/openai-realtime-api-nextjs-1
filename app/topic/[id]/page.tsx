@@ -95,7 +95,7 @@ export default async function TopicLevelPage({ params, searchParams }: { params:
           {topic.Description}
         </div>
       )}
-      <ClientLevelSelector topic={topic} hideParties={true} subtopic={subtopic ? { id: subtopic.id, name: subtopic.Name || subtopic.name, description: subtopic.Description } : undefined} />
+      <ClientLevelSelector topic={topic} hideParties={subtopic?.['Hide Parties']} subtopic={subtopic ? { id: subtopic.id, name: subtopic.Name || subtopic.name, description: subtopic.Description } : undefined} />
     </div>
   );
 } 
