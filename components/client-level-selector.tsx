@@ -103,21 +103,29 @@ export function ClientLevelSelector({ topic, hideParties = false, subtopic }: Cl
       try {
         const response = await fetch('/api/options');
         const data = await response.json();
-        // Find the subtopic for this topic
-        const subtopic = (data.subtopics || []).find((st: any) => {
-          const match = st.Topic === topic.id || st.TopicId === topic.id || (Array.isArray(st.Topic) && st.Topic.includes(topic.id));
-          return match;
-        });
-        if (!subtopic) {
+        
+        // If we have a specific subtopic ID, use that; otherwise find by topic
+        let foundSubtopic;
+        if (subtopic?.id) {
+          foundSubtopic = (data.subtopics || []).find((st: any) => st.id === subtopic.id);
+        } else {
+          // Find the subtopic for this topic (fallback behavior)
+          foundSubtopic = (data.subtopics || []).find((st: any) => {
+            const match = st.Topic === topic.id || st.TopicId === topic.id || (Array.isArray(st.Topic) && st.Topic.includes(topic.id));
+            return match;
+          });
+        }
+        
+        if (!foundSubtopic) {
           setConversationTopics([]);
           setAllLevelTopics({ beginner: [], intermediate: [], advanced: [] });
           setError("找不到相關子主題，請聯絡管理員。");
           return;
         }
         // Pre-load all level-specific conversation topics
-        const starterTopicsRawObj = subtopic["Starter Conversation Topics"] || "";
-        const intermediateTopicsRawObj = subtopic["Intermediate Conversation Topics"] || "";
-        const advancedTopicsRawObj = subtopic["Advanced Conversation Topics"] || "";
+        const starterTopicsRawObj = foundSubtopic["Starter Conversation Topics"] || "";
+        const intermediateTopicsRawObj = foundSubtopic["Intermediate Conversation Topics"] || "";
+        const advancedTopicsRawObj = foundSubtopic["Advanced Conversation Topics"] || "";
         const starterTopicsRaw = typeof starterTopicsRawObj === "string" ? starterTopicsRawObj : starterTopicsRawObj?.value || "";
         const intermediateTopicsRaw = typeof intermediateTopicsRawObj === "string" ? intermediateTopicsRawObj : intermediateTopicsRawObj?.value || "";
         const advancedTopicsRaw = typeof advancedTopicsRawObj === "string" ? advancedTopicsRawObj : advancedTopicsRawObj?.value || "";
@@ -140,7 +148,7 @@ export function ClientLevelSelector({ topic, hideParties = false, subtopic }: Cl
       }
     };
     fetchSubtopicOptions();
-  }, [topic.id]);
+  }, [topic.id, subtopic?.id]);
 
   // Add effect to auto-skip party selection if hideParties is true
   useEffect(() => {
