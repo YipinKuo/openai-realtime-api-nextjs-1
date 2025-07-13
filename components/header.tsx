@@ -35,15 +35,6 @@ export function Header() {
             >
               {t('header.logo')}
             </motion.h1>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3 }}
-            >
-              <Badge variant="outline" className="text-normal">
-                {t('header.beta')}
-              </Badge>
-            </motion.div>
           </Link>
         </motion.nav>
         <motion.div 
