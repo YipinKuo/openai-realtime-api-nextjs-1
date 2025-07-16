@@ -63,7 +63,7 @@ export default async function TopicLevelPage({ params, searchParams }: { params:
     // Parse into sections and options
     const lines = subtopic['Custom Menu'].split('\n');
     let currentSection: string = "";
-    let sections: { section: string, options: string[] }[] = [];
+    const sections: { section: string, options: string[] }[] = [];
     for (const line of lines) {
       const trimmed = line.trim();
       if (!trimmed) continue;
