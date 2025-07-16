@@ -57,6 +57,26 @@ export default async function TopicLevelPage({ params, searchParams }: { params:
 
   if (!topic) return notFound();
 
+  // Parse Custom Menu if present
+  let customMenuOptions = undefined;
+  if (subtopic && subtopic['Custom Menu']) {
+    // Parse into sections and options
+    const lines = subtopic['Custom Menu'].split('\n');
+    let currentSection: string = "";
+    let sections: { section: string, options: string[] }[] = [];
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      if (trimmed.startsWith('#')) {
+        currentSection = trimmed.replace(/^#+/, '').trim();
+        sections.push({ section: currentSection, options: [] });
+      } else if (currentSection && sections.length > 0) {
+        sections[sections.length - 1].options.push(trimmed);
+      }
+    }
+    customMenuOptions = sections;
+  }
+
   return (
     <div className="max-w-3xl mx-auto py-12 px-4">
       <div className="mb-6">
@@ -95,7 +115,12 @@ export default async function TopicLevelPage({ params, searchParams }: { params:
           {topic.Description}
         </div>
       )}
-      <ClientLevelSelector topic={topic} hideParties={subtopic?.['Hide Parties']} subtopic={subtopic ? { id: subtopic.id, name: subtopic.Name || subtopic.name, description: subtopic.Description } : undefined} />
+      <ClientLevelSelector
+        topic={topic}
+        hideParties={subtopic?.['Hide Parties']}
+        subtopic={subtopic ? { id: subtopic.id, name: subtopic.Name || subtopic.name, description: subtopic.Description } : undefined}
+        {...(customMenuOptions ? { customMenuOptions } : {})}
+      />
     </div>
   );
 } 
