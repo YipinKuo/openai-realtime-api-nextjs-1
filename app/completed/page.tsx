@@ -4,13 +4,17 @@ import React from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
-import { CheckCircle, Home } from "lucide-react"
+import { CheckCircle, Home, Grid3X3 } from "lucide-react"
 
 const CompletedPage: React.FC = () => {
   const router = useRouter()
 
   const handleGoHome = () => {
     router.push("/")
+  }
+
+  const handleGoCategories = () => {
+    router.push("/categories")
   }
 
   return (
@@ -58,6 +62,15 @@ const CompletedPage: React.FC = () => {
             >
               <Home className="w-5 h-5 mr-2" />
               返回首頁重新開始
+            </Button>
+            <Button
+              onClick={handleGoCategories}
+              variant="outline"
+              className="w-full"
+              size="lg"
+            >
+              <Grid3X3 className="w-5 h-5 mr-2" />
+              瀏覽所有主題
             </Button>
           </div>
         </motion.div>
