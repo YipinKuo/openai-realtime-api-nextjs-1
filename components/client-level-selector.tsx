@@ -277,7 +277,7 @@ export function ClientLevelSelector({ topic, hideParties = false, subtopic, cust
     return (
       <main className="max-w-4xl mx-auto py-16 px-4">
         <h1 className="text-3xl font-bold mb-12 text-center">選擇題型</h1>
-        <div className="flex flex-col gap-8">
+        <div className="grid grid-cols-2 gap-6">
           {customMenuOptions.map((section) => (
             <button
               key={section.section}
