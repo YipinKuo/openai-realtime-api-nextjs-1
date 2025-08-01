@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState, Suspense } from "react"
+import React, { useEffect, useState, Suspense, useRef } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import useWebRTCAudioSession from "@/hooks/use-webrtc"
 import { tools } from "@/lib/tools"
@@ -11,10 +11,12 @@ import { TokenUsageDisplay } from "@/components/token-usage"
 import { MessageControls } from "@/components/message-controls"
 import { ToolsEducation } from "@/components/tools-education"
 import { TextInput } from "@/components/text-input"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { useToolsFunctions } from "@/hooks/use-tools"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft } from "lucide-react"
+import { useScrollToBottom } from "@/hooks/use-scroll-to-bottom"
+import { useScrollVisibility } from "@/hooks/use-scroll-visibility"
 
 interface Topic {
   id: string;
@@ -36,10 +38,14 @@ const getLevelInChinese = (level: string): string => {
 
 const LiveAppContent: React.FC = () => {
   const router = useRouter()
+  const mainContainerRef = useRef<HTMLDivElement>(null)
   
   // Get selected avatar and determine voice
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null)
   const [voice, setVoice] = useState("alloy") // default fallback
+  
+  // Scroll visibility for floating button
+  const showFloatingButton = useScrollVisibility({ threshold: 150 })
   
   // Get URL search parameters
   const searchParams = useSearchParams()
@@ -118,6 +124,16 @@ const LiveAppContent: React.FC = () => {
   // Get all tools functions
   const toolsFunctions = useToolsFunctions();
 
+  console.log('🎯 LiveAppContent render - conversation length:', conversation.length);
+  console.log('🎯 LiveAppContent render - msgs length:', msgs.length);
+  console.log('🎯 LiveAppContent render - mainContainerRef.current:', !!mainContainerRef.current);
+
+  // Use the scroll hook for auto-scrolling when new content appears
+  const { scrollToBottom } = useScrollToBottom(mainContainerRef, [conversation.length, msgs.length], {
+    delay: 200,
+    behavior: 'smooth'
+  });
+
   useEffect(() => {
     // Register all functions by iterating over the object
     Object.entries(toolsFunctions).forEach(([name, func]) => {
@@ -172,7 +188,8 @@ const LiveAppContent: React.FC = () => {
   return (
     <main className="h-full">
       <motion.div 
-        className="flex flex-col items-center justify-center w-[95vw] sm:w-[90vw] mx-auto my-10 sm:my-20 p-4 sm:p-8 lg:p-12 border rounded-lg shadow-xl"
+        ref={mainContainerRef}
+        className="flex flex-col items-center justify-center w-[95vw] sm:w-[90vw] mx-auto my-10 sm:my-20 p-4 sm:p-8 lg:p-12 border rounded-lg shadow-xl overflow-y-auto scroll-smooth"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -246,10 +263,16 @@ const LiveAppContent: React.FC = () => {
           )}
           
           <div className="flex flex-col items-center gap-4">
-            <BroadcastButton 
-              isSessionActive={isSessionActive} 
-              onClick={handleStartStopClick}
-            />
+            <div 
+              className={`transition-opacity duration-200 ${
+                showFloatingButton ? 'opacity-0 pointer-events-none' : 'opacity-100'
+              }`}
+            >
+              <BroadcastButton 
+                isSessionActive={isSessionActive} 
+                onClick={handleStartStopClick}
+              />
+            </div>
           </div>
           {/* {msgs.length > 4 && <TokenUsageDisplay messages={msgs} />} */}
           {status && (
@@ -308,6 +331,24 @@ const LiveAppContent: React.FC = () => {
           </motion.div>
         )} */}
       </motion.div>
+      
+      {/* Floating BroadcastButton */}
+      <AnimatePresence>
+        {showFloatingButton && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.2 }}
+          >
+            <BroadcastButton 
+              isSessionActive={isSessionActive} 
+              onClick={handleStartStopClick}
+              variant="floating"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 };

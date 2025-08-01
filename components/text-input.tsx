@@ -1,11 +1,12 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Send } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { VoiceInput } from "@/components/voice-input"
+import { useScrollToBottom } from "@/hooks/use-scroll-to-bottom"
 
 interface TextInputProps {
   onSubmit: (text: string) => void
@@ -17,10 +18,23 @@ interface TextInputProps {
 export function TextInput({ onSubmit, disabled = false, isTTSLoading = false, showMicrophone = true }: TextInputProps) {
   const [text, setText] = useState("")
   const [hints, setHints] = useState<string[]>([])
+  const hintsRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  console.log('🎯 TextInput render - hints count:', hints.length);
+  console.log('🎯 TextInput render - hintsRef.current:', !!hintsRef.current);
+  console.log('🎯 TextInput render - containerRef.current:', !!containerRef.current);
+
+  // Use the scroll hook for better scroll behavior
+  const { scrollToElement } = useScrollToBottom(containerRef, [hints.length], {
+    delay: 150,
+    behavior: 'smooth',
+    block: 'nearest'
+  });
 
   useEffect(() => {
     const handleShowHints = (event: CustomEvent) => {
-      console.log('showHints event received:', event.detail)
+      console.log('🎯 TextInput - showHints event received:', event.detail)
       setHints(event.detail.hints || [])
     }
 
@@ -31,6 +45,19 @@ export function TextInput({ onSubmit, disabled = false, isTTSLoading = false, sh
     }
   }, [])
 
+  // Scroll to hints when they appear
+  useEffect(() => {
+    console.log('🎯 TextInput - hints useEffect triggered, hints.length:', hints.length);
+    if (hints.length > 0 && hintsRef.current) {
+      console.log('🎯 TextInput - scrolling to hints');
+      // Use a small delay to ensure the hints are rendered
+      setTimeout(() => {
+        console.log('🎯 TextInput - executing scrollToElement');
+        scrollToElement(hintsRef);
+      }, 100);
+    }
+  }, [hints.length, scrollToElement]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (text.trim()) {
@@ -40,11 +67,13 @@ export function TextInput({ onSubmit, disabled = false, isTTSLoading = false, sh
   }
 
   const handleHintClick = (hint: string) => {
+    console.log('🎯 TextInput - hint clicked:', hint);
     onSubmit(hint)
     setHints([]) // Clear hints after selection
   }
 
   const clearHints = () => {
+    console.log('🎯 TextInput - clearing hints');
     setHints([])
   }
 
@@ -53,10 +82,10 @@ export function TextInput({ onSubmit, disabled = false, isTTSLoading = false, sh
   }
 
   return (
-    <div className="w-full space-y-3">
+    <div ref={containerRef} className="w-full space-y-3">
       {/* Hint buttons */}
       {hints.length > 0 && (
-        <div className="space-y-2">
+        <div ref={hintsRef} className="space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">快速回覆:</span>
             <Button 

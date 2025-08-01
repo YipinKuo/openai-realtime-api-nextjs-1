@@ -8,6 +8,7 @@ import ThreeDotsWave from "@/components/ui/three-dots-wave";
 import { Conversation } from "@/lib/conversations";
 import { useTranslations } from "@/components/translations-context";
 import { useTranslation } from "@/hooks/use-translation";
+import { useScrollToBottom } from "@/hooks/use-scroll-to-bottom";
 
 /**
 * Avatar building blocks with Radix
@@ -22,7 +23,7 @@ const Avatar = React.forwardRef<
      "relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full",
      className,
    )}
-   {...props}
+   {...props }
  />
 ));
 Avatar.displayName = AvatarPrimitive.Root.displayName;
@@ -34,7 +35,7 @@ const AvatarImage = React.forwardRef<
  <AvatarPrimitive.Image
    ref={ref}
    className={cn("aspect-square h-full w-full", className)}
-   {...props}
+   {...props }
  />
 ));
 AvatarImage.displayName = AvatarPrimitive.Image.displayName;
@@ -49,7 +50,7 @@ const AvatarFallback = React.forwardRef<
      "flex h-full w-full items-center justify-center rounded-full bg-muted",
      className,
    )}
-   {...props}
+   {...props }
  />
 ));
 AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName;
@@ -62,11 +63,11 @@ function shouldDisplayMessage(msg: Conversation): boolean {
  const { role, text, status, isFinal } = msg;
 
  if (role === "assistant") {
-   // Always display assistant messages (even if they're empty, though that’s rare).
+   // Always display assistant messages (even if they're empty, though that's rare).
    return true;
  } else {
    // User role
-   // 1) If user is currently speaking or processing, we show it (wave or “Processing…”).
+   // 1) If user is currently speaking or processing, we show it (wave or "Processing…").
    if (status === "speaking" || status === "processing") {
      return true;
    }
@@ -180,17 +181,23 @@ export default function Transcriber({ conversation }: TranscriberProps) {
  const scrollRef = React.useRef<HTMLDivElement>(null);
  const { t } = useTranslations();
 
- // Scroll to bottom whenever conversation updates
- React.useEffect(() => {
-   if (scrollRef.current) {
-     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-   }
- }, [conversation]);
+ console.log('🎯 Transcriber render - conversation length:', conversation.length);
+ console.log('🎯 Transcriber render - scrollRef.current:', !!scrollRef.current);
+
+ // Use the scroll hook for better scroll behavior
+ const { scrollToBottom } = useScrollToBottom(scrollRef, [conversation.length], {
+   delay: 100,
+   behavior: 'smooth'
+ });
 
  // Filter out messages that we do not want to display
  const displayableMessages = React.useMemo(() => {
-   return conversation.filter(shouldDisplayMessage);
+   const filtered = conversation.filter(shouldDisplayMessage);
+   console.log('🎯 Transcriber - displayableMessages count:', filtered.length);
+   return filtered;
  }, [conversation]);
+
+ console.log('🎯 Transcriber - rendering with', displayableMessages.length, 'displayable messages');
 
  return (
    <div className="flex flex-col w-full h-full mx-auto bg-background rounded-lg shadow-lg overflow-hidden dark:bg-background">
@@ -204,7 +211,7 @@ export default function Transcriber({ conversation }: TranscriberProps) {
      {/* Body */}
      <div
        ref={scrollRef}
-       className="flex-1 h-full overflow-y-auto p-4 space-y-4 z-50 scrollbar-thin scrollbar-thumb-primary"
+       className="flex-1 h-full overflow-y-auto p-4 space-y-4 z-50 scrollbar-thin scrollbar-thumb-primary scroll-smooth"
      >
        <AnimatePresence>
          {displayableMessages.map((message) => (
