@@ -6,10 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Send, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { VoiceInput } from "@/components/voice-input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function CustomPage() {
   const [value, setValue] = useState("");
   const [isTTSLoading, setIsTTSLoading] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [dialogValue, setDialogValue] = useState("");
   const router = useRouter();
 
   function handleSubmit(e: React.FormEvent) {
@@ -22,10 +26,8 @@ export default function CustomPage() {
 
   function handleVoiceInput(text: string) {
     setValue(text);
-    // Optionally auto-submit after voice input
-    if (text.trim()) {
-      router.push(`/live?conversationTopic=${encodeURIComponent(text.trim())}`);
-    }
+    setDialogValue(text);
+    if (text.trim()) setIsDialogOpen(true);
   }
 
   function handleGoBack() {
@@ -76,6 +78,45 @@ export default function CustomPage() {
           </Button>
         </form>
       </div>
+
+      {/* Confirm & Edit Dialog for Transcribed Topic */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>確認主題</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">請確認或編輯辨識到的主題內容：</p>
+            <Textarea
+              value={dialogValue}
+              onChange={(e) => setDialogValue(e.target.value)}
+              placeholder="主題內容"
+              className="min-h-[120px]"
+              autoFocus
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsDialogOpen(false);
+              }}
+            >
+              取消
+            </Button>
+            <Button
+              onClick={() => {
+                const topic = dialogValue.trim();
+                if (!topic) return;
+                setIsDialogOpen(false);
+                router.push(`/live?conversationTopic=${encodeURIComponent(topic)}`);
+              }}
+            >
+              開始對話
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 } 

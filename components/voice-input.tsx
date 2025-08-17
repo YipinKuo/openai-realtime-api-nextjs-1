@@ -37,6 +37,8 @@ export function VoiceInput({
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null)
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const recognitionRef = useRef<any>(null)
+  const lastStartMethodRef = useRef<"click" | "longPress" | null>(null)
+  const suppressNextClickRef = useRef<boolean>(false)
 
   // Initialize speech recognition
   useEffect(() => {
@@ -116,7 +118,9 @@ export function VoiceInput({
   const startLongPressTimer = () => {
     setIsLongPressing(true)
     longPressTimerRef.current = setTimeout(() => {
-      startRecording()
+      startRecording("longPress")
+      // Prevent the subsequent click event from toggling state
+      suppressNextClickRef.current = true
     }, 500) // 500ms long press threshold
   }
 
@@ -128,7 +132,7 @@ export function VoiceInput({
     setIsLongPressing(false)
   }
 
-  const startRecording = async () => {
+  const startRecording = async (method: "click" | "longPress") => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       
@@ -148,6 +152,7 @@ export function VoiceInput({
       setIsRecording(true)
       setRecordingTime(0)
       setTranscript("")
+      lastStartMethodRef.current = method
 
       // Start speech recognition
       recognitionRef.current?.start()
@@ -171,14 +176,14 @@ export function VoiceInput({
 
   const handleMouseUp = () => {
     stopLongPressTimer()
-    if (isRecording) {
+    if (isRecording && lastStartMethodRef.current === "longPress") {
       stopRecording()
     }
   }
 
   const handleMouseLeave = () => {
     stopLongPressTimer()
-    if (isRecording) {
+    if (isRecording && lastStartMethodRef.current === "longPress") {
       stopRecording()
     }
   }
@@ -191,8 +196,22 @@ export function VoiceInput({
 
   const handleTouchEnd = () => {
     stopLongPressTimer()
+    if (isRecording && lastStartMethodRef.current === "longPress") {
+      stopRecording()
+    }
+  }
+
+  const handleClick = () => {
+    if (disabled || isTTSLoading) return
+    // If a long-press triggered, the subsequent click should be ignored once
+    if (suppressNextClickRef.current) {
+      suppressNextClickRef.current = false
+      return
+    }
     if (isRecording) {
       stopRecording()
+    } else {
+      startRecording("click")
     }
   }
 
@@ -215,6 +234,7 @@ export function VoiceInput({
             isLongPressing && !isRecording && "scale-110 voice-long-press",
             disabled && "opacity-50 cursor-not-allowed"
           )}
+          onClick={handleClick}
           onMouseDown={handleMouseDown}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseLeave}
