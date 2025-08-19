@@ -202,11 +202,46 @@ export default function useWebRTCAudioSession(
   }
 
   /**
+   * Resolve topic name from params or URL (fallback).
+   */
+  function getQueryParam(name: string): string | undefined {
+    if (typeof window === 'undefined') return undefined;
+    const value = new URLSearchParams(window.location.search).get(name);
+    return value ? value.trim() : undefined;
+  }
+
+  function getTopicFromUrl(): string | undefined {
+    // Topic-related params (exclude customOption here; it will be handled separately)
+    return (
+      getQueryParam('subtopicName') ||
+      getQueryParam('section') ||
+      undefined
+    );
+  }
+
+  function getCustomOptionFromUrl(): string | undefined {
+    return getQueryParam('customOption');
+  }
+
+  function resolveTopicName(): string | undefined {
+    const fromParams = topicName && topicName.trim() ? topicName.trim() : undefined;
+    const fromArray = conversationTopics && conversationTopics.length > 0 ? conversationTopics[0] : undefined;
+    const fromUrl = getTopicFromUrl();
+    return fromParams || fromArray || fromUrl || undefined;
+  }
+
+  function buildTopicPhrase(): string {
+    const name = resolveTopicName();
+    if (!name) return 'conversation';
+    return name.toLowerCase() === 'conversation' ? 'conversation' : `${name} conversation`;
+  }
+
+  /**
    * Generate instruction text based on level and topic
    */
   function generateInstructionText(): string {
-    // Use topicName if available, otherwise use conversationTopics[0] if present
-    const effectiveTopicName = topicName || (conversationTopics && conversationTopics.length > 0 ? conversationTopics[0] : undefined);
+    // Use params, then conversationTopics, then URL as fallback
+    const effectiveTopicName = resolveTopicName();
 
     // Use provided level, or default to 'beginner' if missing
     const usedLevel = level || 'beginner';
@@ -267,10 +302,14 @@ export default function useWebRTCAudioSession(
     // Replace {{roleplay_context}} placeholder
     instruction = instruction.replace(/\{\{roleplay_context\}\}/g, roleplayContext);
 
-    // --- Custom: If user came from /custom, prepend a special instruction ---
-    if (conversationTopics && conversationTopics.length > 0) {
-      const customTopic = conversationTopics[0];
+    // --- Custom: If user came from /custom or URL contains topic-like params, prepend a special instruction ---
+    const customTopic = effectiveTopicName || (conversationTopics && conversationTopics.length > 0 ? conversationTopics[0] : undefined);
+    const customOption = getCustomOptionFromUrl();
+    if (customTopic) {
       instruction = `The user wants to practice the following topic: "${customTopic}". Please focus the conversation on this topic.\n\n` + instruction;
+    }
+    if (customOption) {
+      instruction = `Additionally, the user's custom option is: "${customOption}". This should be treated as the primary focus when shaping scenarios, examples, and questions.\n\n` + instruction;
     }
     // -------------------------------------------------------------
 
@@ -340,7 +379,11 @@ For example, after discussing food preferences, you might show hints like: "What
     dataChannel.send(JSON.stringify(instructionMessage));
 
     // Send initial conversation item to trigger AI to speak first
-    const effectiveTopicName = topicName || (conversationTopics && conversationTopics.length > 0 ? conversationTopics[0] : "conversation");
+    const effectiveTopicName = resolveTopicName() || "conversation";
+    const customOption = getCustomOptionFromUrl();
+    const topicPhrase = customOption
+      ? `${customOption} conversation`
+      : buildTopicPhrase();
     const initialMessage = {
       type: "conversation.item.create",
       item: {
@@ -349,7 +392,7 @@ For example, after discussing food preferences, you might show hints like: "What
         content: [
           {
             type: "input_text",
-            text: `Hello, I'm ready to start our ${effectiveTopicName} conversation. Please begin by introducing yourself and starting the conversation.`,
+            text: `Hello, I'm ready to start our ${topicPhrase}. Please begin by introducing yourself and starting the conversation.`,
           },
         ],
       },
